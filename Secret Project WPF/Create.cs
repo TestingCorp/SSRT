@@ -15,38 +15,6 @@ using System.Windows.Forms.Integration;
 
 namespace Secret_Project_WPF
 {
-    public class ImageClass
-    {
-        public WindowsFormsHost wfh { get; set; }
-        public System.Windows.Forms.PictureBox picBox { get; set; }
-        public String filePath { get; set; }
-        //public bool ImageOpened { get; set; }
-        public ImageClass()
-        {
-            wfh = new WindowsFormsHost();
-            wfh.HorizontalAlignment = HorizontalAlignment.Left;
-            wfh.VerticalAlignment = VerticalAlignment.Top;
-            picBox = new System.Windows.Forms.PictureBox();
-            wfh.Child = picBox;
-            SetSize(0, 0);
-            wfh.Visibility = Visibility.Hidden;
-            picBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            
-        }
-        public void SetSize(int widht, int height)
-        {
-            wfh.Width = widht;
-            picBox.Width = widht;
-            wfh.Height = height;
-            picBox.Height = height;
-        }
-        public void Show()
-        {
-            wfh.Visibility = Visibility.Visible;
-
-        }
-    }
-
     public partial class MainWindow : Window
     {
         /// <summary>
@@ -72,6 +40,7 @@ namespace Secret_Project_WPF
             tabControl.SelectedIndex = tabControl.Items.Count - 2;
 
         }
+
         /// <summary>
         /// Creates a grid with a question with all its parts - textBoxes and Buttons.
         /// </summary>
@@ -118,7 +87,7 @@ namespace Secret_Project_WPF
             tbQuestion.Margin = new Thickness(10, 8, 0, 0);
             tbQuestion.Text = "[въпрос]";
             tbQuestion.GotFocus += CreateTextBox_GotFocus;
-            tbQuestion.LostFocus += CreateTextBoxQuestion_LostFocus;
+            tbQuestion.LostFocus += CreateTextBox_LostFocus;
             gr.Children.Add(tbQuestion);
 
             List<TextBox> ltbAnswers = new List<TextBox>();
@@ -128,7 +97,8 @@ namespace Secret_Project_WPF
                 ltbAnswers.Add(new TextBox());
                 int nLastIndex = ltbAnswers.Count - 1;
 
-                AutomationProperties.SetAutomationId(ltbAnswers[nLastIndex], "textbox_answer");
+                string sID = String.Format("textbox_answer_{0}", i);
+                AutomationProperties.SetAutomationId(ltbAnswers[nLastIndex], sID);
                 ltbAnswers[nLastIndex].Text = asAnswers[i];
                 ltbAnswers[nLastIndex].HorizontalAlignment = HorizontalAlignment.Left;
                 ltbAnswers[nLastIndex].VerticalAlignment = VerticalAlignment.Top;
@@ -136,7 +106,8 @@ namespace Secret_Project_WPF
                 //ltbAnswers[nLastIndex].Width = tabControl.Width - 30 -150-13;
                 ltbAnswers[nLastIndex].Margin = new Thickness(13 + 10, 70 + i * 25, 0, 0);
                 ltbAnswers[nLastIndex].GotFocus += CreateTextBox_GotFocus;
-                ltbAnswers[nLastIndex].LostFocus += CreateTextBoxAnswer_LostFocus;
+                ltbAnswers[nLastIndex].LostFocus += 
+                    CreateTextBox_LostFocus;
                 gr.Children.Add(ltbAnswers[nLastIndex]);
 
                 nLastIndex = g_l2rbAnswers.Count - 1;
@@ -146,8 +117,8 @@ namespace Secret_Project_WPF
                 g_l2rbAnswers[nLastIndex][i].Margin = new Thickness(10, 73 + i * 25, 0, 0);
                 g_l2rbAnswers[nLastIndex][i].HorizontalAlignment = HorizontalAlignment.Left;
                 g_l2rbAnswers[nLastIndex][i].VerticalAlignment = VerticalAlignment.Top;
-                g_l2rbAnswers[nLastIndex][i].Checked += CreateRadioButtonAnswer_Checked;
-                g_l2rbAnswers[nLastIndex][i].Unchecked += CreateRadioButtonAnswer_Unchecked;
+                g_l2rbAnswers[nLastIndex][i].Checked += CreateRadioButtonAnswer_CheckedChanged;
+                g_l2rbAnswers[nLastIndex][i].Unchecked += CreateRadioButtonAnswer_CheckedChanged;
                 gr.Children.Add(g_l2rbAnswers[nLastIndex][i]);
 
                 if (i == Math.Min(asAnswers.Count(), 4) - 1)
@@ -161,7 +132,7 @@ namespace Secret_Project_WPF
                     tbPoints.Text = "[брой точки]";
                     //tbPoints.Margin = new Thickness(10, tabControl.Height - 70, 0, 0);
                     tbPoints.GotFocus += CreateTextBox_GotFocus;
-                    tbPoints.LostFocus += CreateTextBoxPoints_LostFocus;
+                    tbPoints.LostFocus += CreateTextBox_LostFocus;
                     gr.Children.Add(tbPoints);
                 }
             }
@@ -244,6 +215,8 @@ namespace Secret_Project_WPF
 
             ResizeAndAdjust();
         }
+        
+        private DateTime downTime;
 
         void picBox_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
@@ -320,8 +293,6 @@ namespace Secret_Project_WPF
             (sender as Window).Visibility = System.Windows.Visibility.Hidden;
         }
 
-        private DateTime downTime;
-
         void CreateTabItem_GotFocus(object sender, RoutedEventArgs e)
         {
             g_nCurrQuestion = tabControl.SelectedIndex - 1;
@@ -351,34 +322,11 @@ namespace Secret_Project_WPF
         }
 
         /// <summary>
-        /// When a radio button of an answer is checked updates the status of the QuestionClass object.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void CreateRadioButtonAnswer_Checked(object sender, RoutedEventArgs e)
-        {
-            int nAnswerNum = -1, nQuestionNum = -1;
-            for (nQuestionNum = 0; nQuestionNum < g_l2rbAnswers.Count; nQuestionNum++)
-            {
-                for (nAnswerNum = 0; nAnswerNum < g_l2rbAnswers[nQuestionNum].Count; nAnswerNum++)
-                {
-                    if (Object.ReferenceEquals(sender, g_l2rbAnswers[nQuestionNum][nAnswerNum]))
-                    {
-                        goto next;
-                    }
-                }
-            }
-        next:
-            //GetAnswerNumAndQuestionNumFromRadioButtonPosition(sender as RadioButton, out nAnswerNum, out nQuestionNum);
-            g_lQCQuestions[nQuestionNum].UpdateStatus(null, null, nAnswerNum, null, true);
-        }
-
-        /// <summary>
         /// When a radio button of an answer is unchecked updates the status of the QuestionClass object.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CreateRadioButtonAnswer_Unchecked(object sender, RoutedEventArgs e)
+        void CreateRadioButtonAnswer_CheckedChanged(object sender, RoutedEventArgs e)
         {
             int nAnswerNum = -1, nQuestionNum = -1;
             for (nQuestionNum = 0; nQuestionNum < g_l2rbAnswers.Count; nQuestionNum++)
@@ -387,7 +335,9 @@ namespace Secret_Project_WPF
                         goto next;
         next:
             if ((sender as RadioButton).IsChecked == true)
-                g_lQCQuestions[nQuestionNum].UpdateStatus(null, null, nAnswerNum, null, false);
+                g_lQCQuestions[nQuestionNum].SetRightAnswer(nAnswerNum, true);
+            else
+                g_lQCQuestions[nQuestionNum].SetRightAnswer(nAnswerNum, false);
         }
 
         /// <summary>
@@ -400,7 +350,6 @@ namespace Secret_Project_WPF
         {
             for (int i = 0; i < g_lQCQuestions.Count; i++)
             {
-                //TODO: out of range exc
                 switch (g_lQCQuestions[i].IsSomethingWrong(g_l2rbAnswers[i]))
                 {
                     case ISE_ErrorCode.NoAnswers:
@@ -514,70 +463,69 @@ namespace Secret_Project_WPF
                 sText == "[брой точки]" ||
                 sText.Length > 8 &&
                 sText.Substring(0, 9) == "[отговор ")
-                (sender as TextBox).Text = "";
+                (sender as TextBox).Text = String.Empty;
         }
 
         /// <summary>
-        /// Whenever an answer textbox loses focus if it's empty this method makes its content [отговор #]. If not
-        /// it appends its content to the output stream.
+        /// Whenever a textbox loses focus if it's empty this method makes its content equal to the appropriate default value.
+        /// If not it updates the list of questions
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CreateTextBoxAnswer_LostFocus(object sender, RoutedEventArgs e)
+        void CreateTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            int i = 0;
-            for (; i < g_lTITabs.Count - 2; i++)
-            {
-                if ((g_lTITabs[i].Content as Grid).Children.Contains(sender as TextBox)) break;
-            }
-            int nAnswerNum = (int)((sender as TextBox).Margin.Top - 70) / 25 + 1;
-            if ((sender as TextBox).Text == "")
-            {
-                g_lQCQuestions[i - 1].UpdateStatus(null, null, nAnswerNum - 1, "", null);
-                (sender as TextBox).Text = String.Format("[отговор {0}]", ((sender as TextBox).Margin.Top - 70) / 25 + 1);
-            }
-            else
-                g_lQCQuestions[i - 1].UpdateStatus(null, null, nAnswerNum - 1, (sender as TextBox).Text, null);
-        }
+            //Get ID of text box (format is "textbox_answer_{number}")
+            string sID = AutomationProperties.GetAutomationId(sender as TextBox);
 
-        /// <summary>
-        /// Whenever a question textbox loses focus if it's empty this method makes its content [въпрос #]. If not
-        /// it appends its content to the output stream.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void CreateTextBoxQuestion_LostFocus(object sender, RoutedEventArgs e)
-        {
-            int i = 0;
-            for (; i < g_lTITabs.Count - 2; i++)
-            {
-                if ((g_lTITabs[i].Content as Grid).Children.Contains(sender as TextBox)) break;
-            }
-            if ((sender as TextBox).Text == "")
-            {
-                g_lQCQuestions[i - 1].UpdateStatus("", null, -1, null, null);
-                (sender as TextBox).Text = String.Format("[въпрос]");
-            }
-            else
-            {
-                //(sender as TextBox).Text = ManageStringLines((sender as TextBox).Text);
-                g_lQCQuestions[i - 1].UpdateStatus((sender as TextBox).Text, null, -1, null, null);
-            }
-        }
+            //Set the question number from the global variable
+            int nQuestionNum = g_nCurrQuestion;
 
-        /// <summary>
-        /// Whenever a points textbox loses focus if it's empty or contains non-numerical symbols this method makes its content [брой точки].
-        /// If its content is a number, saves the number of points to the QuestionClass object.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void CreateTextBoxPoints_LostFocus(object sender, RoutedEventArgs e)
-        {
-            string sText = (sender as TextBox).Text;
-            int nRes = -1;
-            if (!Int32.TryParse(sText, out nRes) || nRes <= 0)
-                (sender as TextBox).Text = "[брой точки]";
-            g_lQCQuestions[g_nCurrQuestion].UpdateStatus(null, nRes, -1, null, null);
+            string sContent = (sender as TextBox).Text;
+            //Get the answer number from the ID and assign it to nAnswerNum
+
+            if (sID.Length > 14 && sID.Substring(0, 14) == "textbox_answer")
+            {
+                int nAnswerNum = Int32.Parse(sID.Substring(15));
+                //Check if the string in the textbox is empty
+                if (sContent == String.Empty)
+                {
+                    //Set the answer in the global list of questions to be empty as well
+                    g_lQCQuestions[nQuestionNum].SetAnswer(nAnswerNum, String.Empty);
+                    //and set the textbox'es text equal to the appropriate default value
+                    (sender as TextBox).Text = String.Format("[отговор {0}]", nAnswerNum + 1);
+                }
+                else
+                    //If the textbox is not empty set the answer to its content
+                    g_lQCQuestions[nQuestionNum].SetAnswer(nAnswerNum, sContent);
+            }
+            else if(sID == "textbox_question")
+            {
+                //Check if the string in the textbox is empty
+                if (sContent == String.Empty)
+                {
+                    //Set the question in the global list of questions to be empty as well
+                    g_lQCQuestions[g_nCurrQuestion].SetQuestion(String.Empty);
+                    //and set the textbox'es text the appropriate default value
+                    (sender as TextBox).Text = String.Format("[въпрос]");
+                }
+                else
+                {
+                    //If the textbox is not empty set the question equal to its content
+                    g_lQCQuestions[g_nCurrQuestion].SetQuestion(sContent);
+                }
+            }
+            else if(sID == "textbox_points")
+            {
+                int nRes = -1;
+                //Try to convert the content of the textbox into a number
+                if (!Int32.TryParse(sContent, out nRes) || nRes <= 0)
+                {
+                    //if it fails or the number is not positive set the textbox'es content the appropriate default value
+                    (sender as TextBox).Text = "[брой точки]";
+                }
+                //Set the points equal to the texbox'es content
+                g_lQCQuestions[g_nCurrQuestion].SetPoints(nRes);
+            }
         }
     }
 }

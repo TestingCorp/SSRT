@@ -184,7 +184,7 @@ namespace Secret_Project_WPF
             g_lQCQuestions = new List<QuestionClass>();
             g_lICImages = new List<ImageClass>();
 
-            string sInput = "";
+            string sInput = String.Empty;
             using (FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read))
             {
                 using (BinaryReader sr = new BinaryReader(fs))
@@ -292,13 +292,13 @@ namespace Secret_Project_WPF
             for (int i = 0; i < lQCQuestions.Count; i++)
                 if (lQCQuestions[i] != null)
                 {
-                    lsOutput.Add("");
-                    if (!String.IsNullOrEmpty(lQCQuestions[i].sQuestion))
+                    lsOutput.Add(String.Empty);
+                    if (!String.IsNullOrEmpty(lQCQuestions[i].GetQuestion()))
                     {
                         lsOutput[lsOutput.Count - 1] += String.Format("[Q{0},{1}:{2}]",
                                                                       i,
                                                                       lQCQuestions[i].nPoints,
-                                                                      lQCQuestions[i].sQuestion);
+                                                                      lQCQuestions[i].GetQuestion());
                     }
                     for (int j = 0; j < lQCQuestions[i].AnswersCount(); j++)
                     {
@@ -308,7 +308,7 @@ namespace Secret_Project_WPF
                                                                           i,
                                                                           j,
                                                                           (lQCQuestions[i].IsRightAnswer(j)) ?
-                                                                          "{}" : "",
+                                                                          "{}" : String.Empty,
                                                                           lQCQuestions[i].GetAnswer(j));
                         }
                     }
@@ -344,7 +344,8 @@ namespace Secret_Project_WPF
                         l_lQCInput.AddQuestionIfNotExist(nQuestionNum);
                         string sQuestion = String.Format("{0} ({1} точки)", lsArgs[i].SubstringCharToChar(':', ']'), lsArgs[i].SubstringCharToChar(',', ':'));
                         //sQuestion = ManageStringLines(sQuestion);
-                        l_lQCInput[nQuestionNum].UpdateStatus(sQuestion, Int32.Parse(lsArgs[i].SubstringCharToChar(',', ':')), -1, null, null);
+                        l_lQCInput[nQuestionNum].SetQuestion(sQuestion);
+                        l_lQCInput[nQuestionNum].SetPoints(Int32.Parse(lsArgs[i].SubstringCharToChar(',', ':')));
                     }
                     else if (lsArgs[i][1] == 'A')
                     {
@@ -354,7 +355,8 @@ namespace Secret_Project_WPF
                         string sAnswer = lsArgs[i].SubstringCharToChar((bIsRightAnswer ? '}' : ':'), ']');
 
                         l_lQCInput.AddQuestionIfNotExist(nQuestionNum);
-                        l_lQCInput[nQuestionNum].UpdateStatus(null, null, nAnswerNum, sAnswer, bIsRightAnswer);
+                        l_lQCInput[nQuestionNum].SetAnswer(nAnswerNum, sAnswer);
+                        l_lQCInput[nQuestionNum].SetRightAnswer(nAnswerNum, bIsRightAnswer);
                     }
                 }
                 lQCInput = l_lQCInput;
@@ -382,7 +384,7 @@ namespace Secret_Project_WPF
         /// <returns></returns>
         public string Encrypt(ref string text, string password)
         {
-            string sRes = "";
+            string sRes = String.Empty;
             int nPassSize = password.Length,
                 nPassCode = 0;
             for (int i = 0; i < nPassSize; i++)
@@ -400,7 +402,7 @@ namespace Secret_Project_WPF
         /// <returns></returns>
         public string Decrypt(string text, string password)
         {
-            string sRes = "";
+            string sRes = String.Empty;
             int nPassSize = password.Length,
                 nPassCode = 0;
             for (int i = 0; i < nPassSize; i++)
@@ -439,12 +441,13 @@ namespace Secret_Project_WPF
                     }
                     for (int j = 0; j < children.Count; j++)
                     {
+                        string sID = AutomationProperties.GetAutomationId(children[j]);
                         if (i == 0)
                         {
-                            if (AutomationProperties.GetAutomationId(children[j]) == "button_create")
+                            if (sID == "button_create")
                                 (children[j] as Button).Margin = new Thickness(tabControl.Width / 2 - (children[j] as Button).Width - 10,
                                                                                tabControl.Height / 2 - (children[j] as Button).Height, 0, 0);
-                            else if (AutomationProperties.GetAutomationId(children[j]) == "button_do")
+                            else if (sID == "button_do")
                                 (children[j] as Button).Margin = new Thickness(tabControl.Width / 2 + 20,
                                                                                tabControl.Height / 2 - (children[j] as Button).Height, 0, 0);
                         }
@@ -452,13 +455,13 @@ namespace Secret_Project_WPF
                         {
                             double dValue = 0;
                             double dValue2 = 0;
-                            if (AutomationProperties.GetAutomationId(children[j]) == "textbox_question")
+                            if (sID == "textbox_question")
                             {
                                 dValue = tabControl.Width - 30 - nImgWidth;
                                 if (dValue < 0) dValue = 0;
                                 (children[j] as TextBox).Width = dValue;
                             }
-                            else if (AutomationProperties.GetAutomationId(children[j]) == "textbox_points")
+                            else if (sID == "textbox_points")
                             {
                                 dValue = tabControl.Height - 70;
                                 if (dValue < 0)
@@ -467,7 +470,7 @@ namespace Secret_Project_WPF
                                 }
                                 (children[j] as TextBox).Margin = new Thickness(10, dValue, 0, 0);
                             }
-                            else if (AutomationProperties.GetAutomationId(children[j]) == "textbox_answer")
+                            else if (sID.Length > 14 && sID.Substring(0, 14) == "textbox_answer")
                             {
                                 dValue = tabControl.Width - 30 - nImgWidth - 13;
                                 if (dValue < 0)
@@ -476,7 +479,7 @@ namespace Secret_Project_WPF
                                 }
                                 (children[j] as TextBox).Width = dValue;
                             }
-                            else if (AutomationProperties.GetAutomationId(children[j]) == "button_ready")
+                            else if (sID == "button_ready")
                             {
                                 dValue = tabControl.Width - 100;
                                 dValue2 = tabControl.Height - 70;
@@ -493,7 +496,7 @@ namespace Secret_Project_WPF
                                     (children[j] as Button).Margin = new Thickness(dValue, dValue2, 0, 0);
                                 }
                             }
-                            else if (AutomationProperties.GetAutomationId(children[j]) == "button_remove")
+                            else if (sID == "button_remove")
                             {
                                 dValue = tabControl.Width - 100 - 87 - 5;
                                 dValue2 = tabControl.Height - 70;
@@ -507,7 +510,7 @@ namespace Secret_Project_WPF
                                 }
                                 (children[j] as Button).Margin = new Thickness(dValue, dValue2, 0, 0);
                             }
-                            else if (AutomationProperties.GetAutomationId(children[j]) == "button_browse")
+                            else if (sID == "button_browse")
                             {
                                 dValue = tabControl.Width - (children[j] as Button).Width - 10 - 187;
                                 dValue2 = tabControl.Height - 70;
@@ -534,7 +537,7 @@ namespace Secret_Project_WPF
                             }
                             else if (children[j] is Button)
                             {
-                                if (AutomationProperties.GetAutomationId(children[j] as Button) == "button_ready")
+                                if (sID == "button_ready")
                                 {
 
                                     (children[j] as Button).Margin = new Thickness(tabControl.Width - 100, tabControl.Height - 70, 0, 0);

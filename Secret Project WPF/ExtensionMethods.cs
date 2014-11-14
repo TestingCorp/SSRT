@@ -10,10 +10,6 @@ namespace Secret_Project_WPF
 {
     public static class ExtensionMethods
     {
-        //public static T Last<T>(this List<T> list)
-        //{
-        //    return list[list.Count - 1];
-        //}
         /// <summary>
         /// Retrieves a char-to-char substring from this instance. The method provides a starting search index and the
         /// option to include in the substring the start and end chars.
@@ -28,6 +24,7 @@ namespace Secret_Project_WPF
         {
             return str.Substring(str.IndexOf(chStart, nStartAt) + Convert.ToInt32(!bWithStart), str.IndexOf(chEnd, nStartAt) - str.IndexOf(chStart, nStartAt) - Convert.ToInt32(!bWithStart) + Convert.ToInt32(bWithEnd));
         }
+
         /// <summary>
         /// Retrieves a start-to-char substring from this instance. The method provides a starting search index and the
         /// option to include in the substring the start and end chars.
@@ -41,6 +38,7 @@ namespace Secret_Project_WPF
         {
             return str.Substring(nStartAt + Convert.ToInt32(!bWithStart), str.IndexOf(chEnd, nStartAt) - nStartAt - Convert.ToInt32(!bWithStart) + Convert.ToInt32(bWithEnd));
         }
+
         /// <summary>
         /// Adds a question to the list. If the question's number is specified, checks whether
         /// the list already contains the question and adds a new one only if it doesn't.

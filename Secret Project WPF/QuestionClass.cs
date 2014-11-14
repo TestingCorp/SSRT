@@ -13,18 +13,16 @@ namespace Secret_Project_WPF
     /// </summary>
     public class QuestionClass
     {
-        public override string ToString()
-        {
-            return sQuestion;
-        }
         /// <summary>
         /// The question
         /// </summary>
-        public string sQuestion { internal set; get; }
+        public string sQuestion { private set;  private get; }
+
         /// <summary>
         /// The points given if the right answer is selected.
         /// </summary>
         public int nPoints { internal set; get; }
+
         /// <summary>
         /// A private list of AnswerClass objects to store all the answers.
         /// </summary>
@@ -33,7 +31,39 @@ namespace Secret_Project_WPF
         /// <summary>
         /// An initialization constructor
         /// </summary>
-        public QuestionClass() { sQuestion = null; lACAnswers = null; nPoints = 0; }
+        public QuestionClass()
+        {
+            sQuestion = null;
+            lACAnswers = null;
+            nPoints = 0;
+        }
+
+        /// <summary>
+        /// Sets the question equal to the given string
+        /// </summary>
+        /// <param name="question"></param>
+        public void SetQuestion(string question)
+        {
+            sQuestion = question;
+        }
+
+        /// <summary>
+        /// Gets the question
+        /// </summary>
+        /// <param name="question"></param>
+        public string GetQuestion()
+        {
+            return sQuestion;
+        }
+
+        /// <summary>
+        /// Sets the points to the given int
+        /// </summary>
+        /// <param name="points"></param>
+        public void SetPoints(int points)
+        {
+            nPoints = points;
+        }
 
         /// <summary>
         /// Gets the number of answers currently stored in the list of answers.
@@ -43,6 +73,7 @@ namespace Secret_Project_WPF
         {
             return lACAnswers.Count;
         }
+
         /// <summary>
         /// Gets the selected answer as string.
         /// </summary>
@@ -52,6 +83,7 @@ namespace Secret_Project_WPF
         {
             return lACAnswers[answerNumber].sAnswer;
         }
+
         /// <summary>
         /// Sets the selected answer.
         /// </summary>
@@ -61,6 +93,7 @@ namespace Secret_Project_WPF
         {
             lACAnswers[answerNumber].sAnswer = answer;
         }
+
         /// <summary>
         /// Checks if the selected answer is the right answer.
         /// </summary>
@@ -70,6 +103,7 @@ namespace Secret_Project_WPF
         {
             return lACAnswers[answerNumber].bIsRightAnswer;
         }
+
         /// <summary>
         /// Sets the selected answer's right answer property
         /// </summary>
@@ -79,6 +113,7 @@ namespace Secret_Project_WPF
         {
             lACAnswers[answerNumber].bIsRightAnswer = rightAnswer;
         }
+
         /// <summary>
         /// Checks if the selected answer is empty.
         /// </summary>
@@ -88,6 +123,7 @@ namespace Secret_Project_WPF
         {
             return lACAnswers[answerNumber].IsEmpty();
         }
+
         /// <summary>
         /// Makes the selected answer null.
         /// </summary>
@@ -96,6 +132,7 @@ namespace Secret_Project_WPF
         {
             lACAnswers[answerNumber] = null;
         }
+
         /// <summary>
         /// Checks if the selected answer is null.
         /// </summary>
@@ -105,6 +142,7 @@ namespace Secret_Project_WPF
         {
             return (lACAnswers[answerNumber] == null);
         }
+
         /// <summary>
         /// Adds 4 answers to the null list of answer objects.
         /// </summary>
@@ -120,6 +158,7 @@ namespace Secret_Project_WPF
             //TODO: // else throw new exception
             else return false;
         }
+
         /// <summary>
         /// Adds an answer to the list of answer objects.
         /// </summary>
@@ -173,11 +212,12 @@ namespace Secret_Project_WPF
         /// <returns>true if question is empty, false if not</returns>
         public bool IsEmpty()
         {
-            if (sQuestion != "" && sQuestion != null) return false;
+            if (!String.IsNullOrEmpty(sQuestion)) return false;
             for (int i = 0; i < lACAnswers.Count; i++)
                 if (lACAnswers[i] != null && !lACAnswers[i].IsEmpty()) return false;
             return true;
         }
+
         /// <summary>
         /// Checks the question and answers individually if null or empty,
         /// if no right answer is selected and if no points are specified.
@@ -186,7 +226,7 @@ namespace Secret_Project_WPF
         /// <returns>The corresponding error code.</returns>
         public ISE_ErrorCode IsSomethingWrong(List<RadioButton> lrbAnswers)
         {
-            if (this.sQuestion == null || this.sQuestion == "") return ISE_ErrorCode.NoQuestion;
+            if (String.IsNullOrEmpty(sQuestion)) return ISE_ErrorCode.NoQuestion;
             for (int i = 0; i < this.lACAnswers.Count; i++)
             {
                 if (!this.lACAnswers[i].IsEmpty()) break;
@@ -206,13 +246,13 @@ namespace Secret_Project_WPF
         /// <param name="nAnswerNum">the answer number</param>
         /// <param name="sAnswer">the answer</param>
         /// <param name="nbRightAnswer">is the answer the right answer?</param>
-        public void UpdateStatus(string sQuestion, int? nPoints, int nAnswerNum, string sAnswer, bool? nbRightAnswer)
+        /*public void UpdateStatus(string sQuestion, int? nPoints, int nAnswerNum, string sAnswer, bool? nbRightAnswer)
         {
             //if (nQuestionNumber == list.Count) nQuestionNumber--;
             if (sQuestion != null) this.sQuestion = sQuestion;
             if (nPoints != null) this.nPoints = (int)nPoints;
             if (sAnswer != null && nAnswerNum != -1) this.SetAnswer(nAnswerNum, sAnswer);
             if (nbRightAnswer != null) this.SetRightAnswer(nAnswerNum, (bool)nbRightAnswer);
-        }
+        }*/
     }
 }

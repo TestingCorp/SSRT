@@ -38,7 +38,7 @@ namespace Secret_Project_WPF
             tblQuestion.Width = 420;
             tblQuestion.Height = 80;
             tblQuestion.Margin = new Thickness(10, 10, 0, 0);
-            tblQuestion.Text = QCQuestion.sQuestion;
+            tblQuestion.Text = QCQuestion.GetQuestion();
             tblQuestion.TextWrapping = TextWrapping.Wrap;
             gr.Children.Add(tblQuestion);
 

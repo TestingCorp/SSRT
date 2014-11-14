@@ -14,11 +14,11 @@
         {
             public bool bIsRightAnswer { internal set; get; }
             public string sAnswer { internal set; get; }
-            public AnswerClass() { bIsRightAnswer = false; sAnswer = ""; }
+            public AnswerClass() { bIsRightAnswer = false; sAnswer = String.Empty; }
             //public AnswerClass(string str, bool rightAnswer = false) { sAnswer = str; this.bIsRightAnswer = rightAnswer; }
             public bool IsEmpty()
             { 
-                return (sAnswer == "" || sAnswer == null);
+                return String.IsNullOrEmpty(sAnswer);
             }
         }
     }
