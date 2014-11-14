@@ -373,28 +373,6 @@ namespace Secret_Project_WPF
             }
         }
 
-        //public string ManageStringLines(string text, int nMaxLineLength = 73)
-        //{
-        //    if (text.Length >= nMaxLineLength)
-        //        for (int j = 0, nLineBeginning = 0; j < text.Length; j++)
-        //        {
-        //            if (text[j] == '\n') nLineBeginning = j;
-        //            if (j == nLineBeginning + nMaxLineLength)
-        //                for (int i = j; i > nLineBeginning; i--)
-        //                {
-        //                    if (text[i] == ' ')
-        //                    {
-        //                        text = text.Insert(i, "\n");
-        //                        text = text.Remove(i + 1, 1);
-        //                        nLineBeginning = i + 1;
-        //                        if (i + nMaxLineLength + 1 > text.Length) return text;
-        //                        else j = i + nMaxLineLength + 1;
-        //                    }
-        //                }
-        //        }
-        //    return text;
-        //}
-
         /// <summary>
         /// Encrypts a text with a password. The passCode is the sum of all the password's chars as numbers.
         /// The passcode is then added to each char of the text.
