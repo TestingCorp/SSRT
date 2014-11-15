@@ -12,10 +12,28 @@
         /// </summary>
         class AnswerClass
         {
-            public bool bIsRightAnswer { internal set; get; }
-            public string sAnswer { internal set; get; }
-            public AnswerClass() { bIsRightAnswer = false; sAnswer = String.Empty; }
-            //public AnswerClass(string str, bool rightAnswer = false) { sAnswer = str; this.bIsRightAnswer = rightAnswer; }
+            /// <summary>
+            /// The answer
+            /// </summary>
+            public string sAnswer { set; get; }
+
+            /// <summary>
+            /// A boolean representing whether the answer is the righ one
+            /// </summary>
+            public bool bIsRightAnswer { set; get; }
+
+            /// <summary>
+            /// Sets sAnswer to an empty string and the boolean for the right answer to false
+            /// </summary>
+            public AnswerClass()
+            {
+                bIsRightAnswer = false; sAnswer = String.Empty;
+            }
+
+            /// <summary>
+            /// Checks if the answer given is null or an empty string
+            /// </summary>
+            /// <returns></returns>
             public bool IsEmpty()
             { 
                 return String.IsNullOrEmpty(sAnswer);

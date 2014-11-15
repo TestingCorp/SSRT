@@ -16,7 +16,7 @@ namespace Secret_Project_WPF
         /// <summary>
         /// The question
         /// </summary>
-        public string sQuestion { private set;  private get; }
+        public string sQuestion { internal set; get; }
 
         /// <summary>
         /// The points given if the right answer is selected.
@@ -236,23 +236,5 @@ namespace Secret_Project_WPF
             if (this.nPoints <= 0) return ISE_ErrorCode.NoPoints;
             return ISE_ErrorCode.AllFine;
         }
-
-        /// <summary>
-        /// Updates the information of a based on the parameters. If any of the parameters is null,
-        /// their status is not updated.
-        /// </summary>
-        /// <param name="sQuestion">the question</param>
-        /// <param name="nPoints">the question's points</param>
-        /// <param name="nAnswerNum">the answer number</param>
-        /// <param name="sAnswer">the answer</param>
-        /// <param name="nbRightAnswer">is the answer the right answer?</param>
-        /*public void UpdateStatus(string sQuestion, int? nPoints, int nAnswerNum, string sAnswer, bool? nbRightAnswer)
-        {
-            //if (nQuestionNumber == list.Count) nQuestionNumber--;
-            if (sQuestion != null) this.sQuestion = sQuestion;
-            if (nPoints != null) this.nPoints = (int)nPoints;
-            if (sAnswer != null && nAnswerNum != -1) this.SetAnswer(nAnswerNum, sAnswer);
-            if (nbRightAnswer != null) this.SetRightAnswer(nAnswerNum, (bool)nbRightAnswer);
-        }*/
     }
 }

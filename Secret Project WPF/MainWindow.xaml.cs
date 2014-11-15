@@ -35,47 +35,58 @@ namespace Secret_Project_WPF
     }
 
     /// <summary>
+    /// Contains all possible states of a test.
+    /// </summary>
+    public enum TestState
+    {
+        DoingNothing,
+        DoingTest,
+        CreatingTest
+    }
+
+    /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         /// <summary>
-        /// Contains all possible states of a test.
-        /// </summary>
-        public enum TestState
-        {
-            DoingNothing,
-            DoingTest,
-            CreatingTest
-        }
-        /// <summary>
         /// The current state of the test.
         /// </summary>
         TestState state = TestState.DoingNothing;
+
         /// <summary>
-        /// A global list of QuestionClass objects that represent the questions currently in use.
+        /// The questions currently in use.
         /// </summary>
         public List<QuestionClass> g_lQCQuestions = null;
+
         /// <summary>
-        /// A global 2-dimentional list of RadioButton objects that represent the answers in the GUI.
+        /// The RadioButton answers in the GUI.
         /// </summary>
         public List<List<RadioButton>> g_l2rbAnswers = null;
+
         /// <summary>
-        /// A global list of Buttons that represent the "Ready" button when doing test. It is used to be made
-        /// inactive after the test is done.
+        /// The tabs in the GUI. Used for data bindings with the TabControl
         /// </summary>
-        //public List<Button> g_lbtReady = null;
         public ObservableCollection<TabItem> g_lTITabs = null;
-        public Window g_wImageWindow = null;
-        public List<ImageClass> g_lICImages = null;
+
         /// <summary>
-        /// The number of the current question being done.
+        /// The window that opens when you click on an image
+        /// </summary>
+        public Window g_wImageWindow = null;
+
+        /// <summary>
+        /// The Images used in the questions
+        /// </summary>
+        public List<ImageClass> g_lICImages = null;
+
+        /// <summary>
+        /// The current question being done.
         /// </summary>
         public int g_nCurrQuestion = 0;
 
         public MainWindow()
         {
-            tabControl = new TabControl();
+            //tabControl = new TabControl();
             g_lTITabs = new ObservableCollection<TabItem>();
             g_lICImages = new List<ImageClass>();
             g_wImageWindow = new Window();
@@ -422,7 +433,9 @@ namespace Secret_Project_WPF
                 tabControl.Width = window1.ActualWidth - 30;
                 for (int i = 0; i < g_lTITabs.Count; i++)
                 {
-                    tabControl.Items.MoveCurrentToPosition(i);
+                    if (state == TestState.CreatingTest &&
+                        g_lTITabs.Count > 1 &&
+                        i == g_lTITabs.Count - 1) break;
                     (g_lTITabs[i].Content as Grid).Width = window1.ActualWidth;
                     (g_lTITabs[i].Content as Grid).Height = tabControl.Height - 40;
                     (g_lTITabs[i].Content as Grid).Margin = new Thickness(0, -5, 0, 0);
@@ -549,13 +562,9 @@ namespace Secret_Project_WPF
             }
             catch (Exception ex)
             {
-                if (ex is NullReferenceException) return;
-                else
-                {
-                    string message = String.Format("Имаше грешка при оразмеряването! {0}", ex.Message);
-                    MessageBox.Show(message);
-                    MessageBox.Show(ex.StackTrace);
-                }
+                string message = String.Format("Имаше грешка при оразмеряването! {0}", ex.Message);
+                MessageBox.Show(message);
+                MessageBox.Show(ex.StackTrace);
             }
         }
     }
