@@ -5,13 +5,13 @@
         >
     <Window.Resources>
         <!-- Globbal properties -->
-        <SolidColorBrush x:Key="ScrollThumbBrush" Color="#990" />
-        <SolidColorBrush x:Key="ScrollBackroundBrush" Color="#CC0"/>
-        <SolidColorBrush x:Key="TabControlBackroundBrush" Color="#F3FA8A"/>
-        <SolidColorBrush x:Key="TabControlBorderBrush" Color="Yellow"/>
-        <SolidColorBrush x:Key="TabBackgroundBrush" Color="#990"/>
-        <SolidColorBrush x:Key="TabBackgroundBrush_whenActive" Color="Yellow"/>
-        <SolidColorBrush x:Key="TabBorderBrush" Color="#CC0"/>
+        <SolidColorBrush x:Key="ScrollThumbBrush" Color="#85A694" />
+        <SolidColorBrush x:Key="ScrollBackroundBrush" Color="#A4CDB7"/>
+        <SolidColorBrush x:Key="TabControlBackroundBrush" Color="#D6FFE9"/>
+        <SolidColorBrush x:Key="TabControlBorderBrush" Color="#A4CDB7"/>
+        <SolidColorBrush x:Key="TabBackgroundBrush" Color="#236A62"/>
+        <SolidColorBrush x:Key="TabBackgroundBrush_whenActive" Color="#77CDC4"/>
+        <SolidColorBrush x:Key="TabBorderBrush" Color="#A4CDB7"/>
         <SolidColorBrush x:Key="TabForegroundBrush" Color="White"/>
         <SolidColorBrush x:Key="TabForegroundBrush_whenActive" Color="Black"/>
         <SolidColorBrush x:Key="TextBoxBackroundBrush" Color="#FFFFDD"/>
