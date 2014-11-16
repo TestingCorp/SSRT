@@ -73,7 +73,7 @@ namespace Secret_Project_WPF
             btRemove.Height = 25;
             //btRemove.Margin = new Thickness(tabControl.Width - 115 - 87 - 10, tabControl.Height - 70, 0, 0);
             btRemove.Content = "Изтриване";
-            btRemove.Click += btRemove_Click;
+            btRemove.Click += CreateButtonRemove_Click;
             gr.Children.Add(btRemove);
 
             TextBox tbQuestion = new TextBox();
@@ -106,7 +106,7 @@ namespace Secret_Project_WPF
                 //ltbAnswers[nLastIndex].Width = tabControl.Width - 30 -150-13;
                 ltbAnswers[nLastIndex].Margin = new Thickness(13 + 10, 70 + i * 25, 0, 0);
                 ltbAnswers[nLastIndex].GotFocus += CreateTextBox_GotFocus;
-                ltbAnswers[nLastIndex].LostFocus += 
+                ltbAnswers[nLastIndex].LostFocus +=
                     CreateTextBox_LostFocus;
                 gr.Children.Add(ltbAnswers[nLastIndex]);
 
@@ -144,12 +144,10 @@ namespace Secret_Project_WPF
             browse.Width = 95;
             browse.Height = 25;
             browse.Content = "+Изображение";
-            browse.Click += new RoutedEventHandler(browse_Click);
+            browse.Click += new RoutedEventHandler(CreateButtonBrowse_Click);
             gr.Children.Add(browse);
 
             g_lICImages.Add(new ImageClass());
-            g_lICImages[g_nCurrQuestion].picBox.MouseDown += picBox_MouseDown;
-            g_lICImages[g_nCurrQuestion].picBox.MouseUp += picBox_MouseUp;
             //WindowsFormsHost wfh = new WindowsFormsHost();
 
             /*wfh.Width = tabControl.ActualWidth - 350;
@@ -161,7 +159,7 @@ namespace Secret_Project_WPF
             return gr;
         }
 
-        void browse_Click(object sender, RoutedEventArgs e)
+        void CreateButtonBrowse_Click(object sender, RoutedEventArgs e)
         {
             var browseBut = sender as Button;
             if (browseBut.Content.Equals("-Изображение"))
@@ -186,7 +184,6 @@ namespace Secret_Project_WPF
             imageDialog.FilterIndex = 1;
             bool? nbClickedOK = imageDialog.ShowDialog();
             if (nbClickedOK == false) return;
-            g_lICImages[g_nCurrQuestion].filePath = imageDialog.FileName;
             browseBut.Content = "-Изображение";
             /*
             BitmapImage bitmap = new BitmapImage();
@@ -202,7 +199,7 @@ namespace Secret_Project_WPF
             img.MouseDown += img_MouseDown;
             img.MouseUp += img_MouseUp;
             */
-            System.Drawing.Image img = System.Drawing.Image.FromFile(g_lICImages[g_nCurrQuestion].filePath);
+            System.Drawing.Image img = System.Drawing.Image.FromFile(imageDialog.FileName);
             g_lICImages[g_nCurrQuestion].SetSize(
                 (int)((double)(img.Width) / (img.Height) * (int)(tabControl.ActualHeight - 95)),
                 (int)(tabControl.ActualHeight - 95)
@@ -210,88 +207,32 @@ namespace Secret_Project_WPF
             g_lICImages[g_nCurrQuestion].Show();
             g_lICImages[g_nCurrQuestion].picBox.Image = img;
             //g_lICImages[g_nCurrQuestion].SetMargin(new Thickness(tabControl.Width - g_lICImages[g_nCurrQuestion].picBox.Width - 15, 9, 0, 0));
-            g_lICImages[g_nCurrQuestion].picBox.MouseDown += picBox_MouseDown;
-            g_lICImages[g_nCurrQuestion].picBox.MouseUp += picBox_MouseUp;
+            g_lICImages[g_nCurrQuestion].picBox.MouseDown += ImageClass.picBox_MouseDown;
+            g_lICImages[g_nCurrQuestion].picBox.MouseUp += /*picBox_MouseUp*/
+                (object mouseUpSender, System.Windows.Forms.MouseEventArgs mouseUpE) =>
+                {
+                    System.Windows.Forms.PictureBox l_picBox =
+                        g_lICImages[g_nCurrQuestion].picBox_MouseUp(mouseUpSender, mouseUpE);
+                    if (l_picBox != null)
+                    {
+                        SetControlsIsEnabled(false);
+                        System.ComponentModel.CancelEventHandler handle = null;
+                        handle = (object imageClosingSender, System.ComponentModel.CancelEventArgs ImageClosingE) =>
+                        {
+                            g_lICImages[g_nCurrQuestion].imageWindow_Closing(l_picBox, imageClosingSender, ImageClosingE, handle);
+                            SetControlsIsEnabled(true);
+                            ResizeAndAdjust();
+                        };
+                        ImageClass.SetWinClosingHandle(handle);
+                        
+                        ResizeAndAdjust();
+                    }
+                };
 
             ResizeAndAdjust();
         }
+
         
-        private DateTime downTime;
-
-        void picBox_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            if (e.Button == System.Windows.Forms.MouseButtons.Left)
-                this.downTime = DateTime.Now;
-        }
-
-        void picBox_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            if (e.Button == System.Windows.Forms.MouseButtons.Left)
-            {
-
-                TimeSpan timeSinceDown = DateTime.Now - this.downTime;
-                if (timeSinceDown.TotalMilliseconds < 300)
-                {
-                    Window imageWindow = g_wImageWindow;
-                    //imageWindow = new Window();
-
-                    /*BitmapFrame bitmapFrame = BitmapFrame.Create(new Uri(g_lICImages[g_nCurrQuestion].filePath), BitmapCreateOptions.DelayCreation, BitmapCacheOption.None);
-                    int width = bitmapFrame.PixelWidth;
-                    int height = bitmapFrame.PixelHeight;
-                    */
-                    /* Image img = new Image();
-                     BitmapImage bitmap = new BitmapImage();
-                     bitmap.BeginInit();
-                     bitmap.UriSource = new Uri(g_lICImages[g_nCurrQuestion].filePath, UriKind.Absolute);
-                     bitmap.EndInit();
-                     img.Stretch = Stretch.Uniform;
-                     img.Source = bitmap;
-                     //img.Width = tabControl.ActualWidth - 350;
-                     img.Height = 500;
-                     * 
-                     img.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-                     img.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-
-                     img.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                     img.Arrange(new Rect(new Point(0, 0), img.DesiredSize));
-                     Size size = img.DesiredSize;
-                     */
-                    WindowsFormsHost wfh = new WindowsFormsHost();
-                    System.Windows.Forms.PictureBox picBox = new System.Windows.Forms.PictureBox();
-                    System.Drawing.Image img = System.Drawing.Image.FromFile(g_lICImages[g_nCurrQuestion].filePath);
-                    picBox.Image = img;
-                    wfh.Child = picBox;
-                    //wfh.Height = 500;
-                    imageWindow.Height = 500;
-                    picBox.Height = 500;
-                    //wfh.Width = (int)((double)(img.Width) * picBox.Height / img.Height);
-                    picBox.Width = (int)((double)(img.Width) * picBox.Height / img.Height);
-                    picBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-                    imageWindow.Width = picBox.Width;
-                    imageWindow.Content = wfh;
-                    //imageWindow.Width = size.Width;
-                    imageWindow.ResizeMode = System.Windows.ResizeMode.NoResize;
-                    //imageWindow.Icon = Properties.Resources.icon;
-                    var iconHandle = Properties.Resources.icon;
-                    System.Drawing.Bitmap bitmap = iconHandle.ToBitmap();
-                    IntPtr hBitmap = bitmap.GetHbitmap();
-
-                    ImageSource wpfBitmap =
-                         System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                              hBitmap, IntPtr.Zero, Int32Rect.Empty,
-                              BitmapSizeOptions.FromEmptyOptions());
-                    imageWindow.Icon = wpfBitmap;
-                    imageWindow.Closing += imageWindow_Closing;
-                    imageWindow.Show();
-                }
-            }
-        }
-
-        void imageWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            e.Cancel = true;
-            (sender as Window).Visibility = System.Windows.Visibility.Hidden;
-        }
 
         void CreateTabItem_GotFocus(object sender, RoutedEventArgs e)
         {
@@ -304,7 +245,7 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void btRemove_Click(object sender, RoutedEventArgs e)
+        void CreateButtonRemove_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show("Сигурни ли сте, че искате да изтриете този въпрос?", "Внимание!",
                 MessageBoxButton.YesNo) == MessageBoxResult.No) return;
@@ -312,6 +253,7 @@ namespace Secret_Project_WPF
             g_l2rbAnswers.RemoveAt(g_nCurrQuestion);
             tabControl.SelectedIndex = 0;
             g_lTITabs.RemoveAt(g_nCurrQuestion + 1);
+            g_lICImages.RemoveAt(g_nCurrQuestion);
             if (g_lTITabs.Count == 2)
                 tabControl.SelectedIndex = g_lTITabs.Count - 1;
             else if (g_nCurrQuestion > 0)
@@ -319,25 +261,6 @@ namespace Secret_Project_WPF
             tabControl.SelectedIndex = g_nCurrQuestion + 1;
             for (int i = g_nCurrQuestion + 1; i < g_lTITabs.Count - 1; i++)
                 g_lTITabs[i].Header = String.Format("Въпрос {0}", i);
-        }
-
-        /// <summary>
-        /// When a radio button of an answer is unchecked updates the status of the QuestionClass object.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void CreateRadioButtonAnswer_CheckedChanged(object sender, RoutedEventArgs e)
-        {
-            int nAnswerNum = -1, nQuestionNum = -1;
-            for (nQuestionNum = 0; nQuestionNum < g_l2rbAnswers.Count; nQuestionNum++)
-                for (nAnswerNum = 0; nAnswerNum < g_l2rbAnswers[nQuestionNum].Count; nAnswerNum++)
-                    if (Object.ReferenceEquals(sender, g_l2rbAnswers[nQuestionNum][nAnswerNum]))
-                        goto next;
-        next:
-            if ((sender as RadioButton).IsChecked == true)
-                g_lQCQuestions[nQuestionNum].SetRightAnswer(nAnswerNum, true);
-            else
-                g_lQCQuestions[nQuestionNum].SetRightAnswer(nAnswerNum, false);
         }
 
         /// <summary>
@@ -435,20 +358,23 @@ namespace Secret_Project_WPF
             }
         }
 
-        public byte[] BufferFromImage(BitmapImage imageSource)
+        /// <summary>
+        /// When a radio button of an answer is unchecked updates the status of the QuestionClass object.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void CreateRadioButtonAnswer_CheckedChanged(object sender, RoutedEventArgs e)
         {
-            Stream stream = imageSource.StreamSource;
-            byte[] buffer = null;
-
-            if (stream != null && stream.Length > 0)
-            {
-                using (BinaryReader br = new BinaryReader(stream))
-                {
-                    buffer = br.ReadBytes((Int32)stream.Length);
-                }
-            }
-
-            return buffer;
+            int nAnswerNum = -1, nQuestionNum = -1;
+            for (nQuestionNum = 0; nQuestionNum < g_l2rbAnswers.Count; nQuestionNum++)
+                for (nAnswerNum = 0; nAnswerNum < g_l2rbAnswers[nQuestionNum].Count; nAnswerNum++)
+                    if (Object.ReferenceEquals(sender, g_l2rbAnswers[nQuestionNum][nAnswerNum]))
+                        goto next;
+        next:
+            if ((sender as RadioButton).IsChecked == true)
+                g_lQCQuestions[nQuestionNum].SetRightAnswer(nAnswerNum, true);
+            else
+                g_lQCQuestions[nQuestionNum].SetRightAnswer(nAnswerNum, false);
         }
 
         /// <summary>
@@ -498,7 +424,7 @@ namespace Secret_Project_WPF
                     //If the textbox is not empty set the answer to its content
                     g_lQCQuestions[nQuestionNum].SetAnswer(nAnswerNum, sContent);
             }
-            else if(sID == "textbox_question")
+            else if (sID == "textbox_question")
             {
                 //Check if the string in the textbox is empty
                 if (sContent == String.Empty)
@@ -514,7 +440,7 @@ namespace Secret_Project_WPF
                     g_lQCQuestions[g_nCurrQuestion].SetQuestion(sContent);
                 }
             }
-            else if(sID == "textbox_points")
+            else if (sID == "textbox_points")
             {
                 int nRes = -1;
                 //Try to convert the content of the textbox into a number

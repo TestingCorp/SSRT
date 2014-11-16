@@ -69,10 +69,7 @@ namespace Secret_Project_WPF
         /// </summary>
         public ObservableCollection<TabItem> g_lTITabs = null;
 
-        /// <summary>
-        /// The window that opens when you click on an image
-        /// </summary>
-        public Window g_wImageWindow = null;
+        
 
         /// <summary>
         /// The Images used in the questions
@@ -89,18 +86,24 @@ namespace Secret_Project_WPF
             //tabControl = new TabControl();
             g_lTITabs = new ObservableCollection<TabItem>();
             g_lICImages = new List<ImageClass>();
-            g_wImageWindow = new Window();
+            //g_wImageWindow = new Window();
 
             InitializeComponent();
             CreateAndAddMainTab();
 
             tabControl.ItemsSource = g_lTITabs;
 
-            window1.KeyDown += window1_KeyDown;
-            window1.KeyUp += window1_KeyUp;
             window1.SizeChanged += delegate { ResizeAndAdjust(); };
-            window1.Closing += delegate { g_wImageWindow.Close(); };
+            window1.Closing += window1_Closing;
             window1.StateChanged += delegate { ResizeAndAdjust(); };
+        }
+
+        void window1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ImageClass.CloseWindow();
+            g_lICImages = null;
+            g_lTITabs = null;
+            Application.Current.Shutdown();
         }
 
         /// <summary>
@@ -169,6 +172,11 @@ namespace Secret_Project_WPF
             tabControl.SelectedIndex = tabControl.Items.Count - 1;
         }
 
+        /// <summary>
+        /// Event handler for the Do button at the main tab.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void DoButton_Click(object sender, RoutedEventArgs e)
         {
             if (state != TestState.DoingNothing)
@@ -237,47 +245,6 @@ namespace Secret_Project_WPF
             g_nCurrQuestion = 0;
             state = TestState.DoingTest;
             ResizeAndAdjust();
-        }
-
-        bool rightCtrlPressed = false;
-
-        /// <summary>
-        /// A keyUp event handler. Its current function is to be used for the cheating option.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void window1_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (rightCtrlPressed && e.Key == Key.RightCtrl) rightCtrlPressed = false;
-        }
-
-        /// <summary>
-        /// A keyDown event handler. Its current function is to be used for the cheating option.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void window1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (state == TestState.DoingTest)
-            {
-                if (e.Key == Key.RightCtrl) rightCtrlPressed = true;
-                else if (e.Key == Key.NumPad0 && rightCtrlPressed) ShowRightAnswer();
-            }
-        }
-
-        /// <summary>
-        /// Differentiates the right answer from the others by adding a space in the beginning. Used for the cheating option.
-        /// </summary>
-        void ShowRightAnswer()
-        {
-            int? nnRightAnswerNum = g_lQCQuestions[g_nCurrQuestion].GetRightAnswerIndex();
-            if (nnRightAnswerNum == null) return;
-            int nRightAnswerNum = (int)(nnRightAnswerNum);
-
-            string sContent = g_l2rbAnswers[g_nCurrQuestion][nRightAnswerNum].Content as string;
-            if (sContent.Length == 0) return;
-            sContent = (sContent.Substring(0, 1) == " ") ? (sContent.Substring(1)) : (sContent.Insert(0, " "));
-            g_l2rbAnswers[g_nCurrQuestion][nRightAnswerNum].Content = sContent;
         }
 
         /// <summary>
@@ -423,6 +390,31 @@ namespace Secret_Project_WPF
             return sRes;
         }
 
+        private void SetControlsIsEnabled(bool enabled)
+        {
+            UIElementCollection children = (g_lTITabs[g_nCurrQuestion+1].Content as Grid).Children;
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (children[i] is Button) (children[i] as Button).IsEnabled = enabled;
+            }
+            for (int i = 0; i < g_lTITabs.Count; i++)
+            {
+                g_lTITabs[i].IsEnabled = enabled;
+            }
+        }
+
+        private void DisableControls()
+        {
+            UIElementCollection children = (g_lTITabs[g_nCurrQuestion].Content as Grid).Children;
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (children[i] is Button) (children[i] as Button).IsEnabled = false;
+            }
+        }
+
+        /// <summary>
+        /// Controls the size and position of the controls in the GUI
+        /// </summary>
         private void ResizeAndAdjust()
         {
             try
@@ -444,7 +436,8 @@ namespace Secret_Project_WPF
                     for (int j = 0; j < children.Count; j++)
                     {
                         if (children[j] is WindowsFormsHost)
-                            if ((children[j] as WindowsFormsHost).Child.Size.IsEmpty == false)
+                            if ((children[j] as WindowsFormsHost).Child.Size.IsEmpty == false &&
+                                ((children[j] as WindowsFormsHost).Child as System.Windows.Forms.PictureBox).Image != null)
                             {
                                 nImgWidth = (children[j] as WindowsFormsHost).Child.Size.Width;
                                 (children[j] as WindowsFormsHost).Margin = new Thickness(tabControl.Width - nImgWidth - 15, 9, 0, 0);

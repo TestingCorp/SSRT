@@ -9,7 +9,7 @@ using System.Windows.Controls;
 namespace Secret_Project_WPF
 {
     /// <summary>
-    /// The class used to store the questions.
+    /// Stores information about the questions.
     /// </summary>
     public class QuestionClass
     {
