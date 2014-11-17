@@ -159,6 +159,11 @@ namespace Secret_Project_WPF
             return gr;
         }
 
+        void CreateTabItem_GotFocus(object sender, RoutedEventArgs e)
+        {
+            g_nCurrQuestion = tabControl.SelectedIndex - 1;
+        }
+
         void CreateButtonBrowse_Click(object sender, RoutedEventArgs e)
         {
             var browseBut = sender as Button;
@@ -176,67 +181,40 @@ namespace Secret_Project_WPF
                 return;
             }
 
-            //Image img = g_lICImages[g_nCurrQuestion].img;
-
             OpenFileDialog imageDialog = new OpenFileDialog();
             imageDialog.Multiselect = false;
             imageDialog.Filter = "Image File (.jpg, .jpeg, .bmp, .png)|*.jpg; *.jpeg; *.bmp; *.png";
             imageDialog.FilterIndex = 1;
+
             bool? nbClickedOK = imageDialog.ShowDialog();
-            if (nbClickedOK == false) return;
+            if (nbClickedOK == false || nbClickedOK == null) return;
             browseBut.Content = "-Изображение";
-            /*
-            BitmapImage bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(g_lICImages[g_nCurrQuestion].filePath, UriKind.Absolute);
-            bitmap.EndInit();
-            img.Stretch = Stretch.Fill;
-            img.Source = bitmap;
-            img.Width = tabControl.ActualWidth - 350;
-            img.Height = tabControl.ActualHeight - 95;
-            img.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
-            img.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            img.MouseDown += img_MouseDown;
-            img.MouseUp += img_MouseUp;
-            */
+
             System.Drawing.Image img = System.Drawing.Image.FromFile(imageDialog.FileName);
-            g_lICImages[g_nCurrQuestion].SetSize(
-                (int)((double)(img.Width) / (img.Height) * (int)(tabControl.ActualHeight - 95)),
-                (int)(tabControl.ActualHeight - 95)
-                );
-            g_lICImages[g_nCurrQuestion].Show();
-            g_lICImages[g_nCurrQuestion].picBox.Image = img;
-            //g_lICImages[g_nCurrQuestion].SetMargin(new Thickness(tabControl.Width - g_lICImages[g_nCurrQuestion].picBox.Width - 15, 9, 0, 0));
-            g_lICImages[g_nCurrQuestion].picBox.MouseDown += ImageClass.picBox_MouseDown;
-            g_lICImages[g_nCurrQuestion].picBox.MouseUp += /*picBox_MouseUp*/
+
+            double imageRatio = (double)(img.Width) / img.Height;
+            int controlsHeight = (int)(tabControl.ActualHeight - 95);
+            int controlsWidth = (int)(imageRatio * controlsHeight);
+
+            ImageClass currentImage = g_lICImages[g_nCurrQuestion];
+            currentImage.picBox.Image = img;
+            currentImage.SetSize(controlsWidth, controlsHeight);
+            currentImage.Show();
+
+            currentImage.picBox.MouseDown += ImageClass.picBox_MouseDown;
+            currentImage.picBox.MouseUp += /*picBox_MouseUp*/
                 (object mouseUpSender, System.Windows.Forms.MouseEventArgs mouseUpE) =>
                 {
-                    System.Windows.Forms.PictureBox l_picBox =
-                        g_lICImages[g_nCurrQuestion].picBox_MouseUp(mouseUpSender, mouseUpE);
-                    if (l_picBox != null)
-                    {
-                        SetControlsIsEnabled(false);
-                        System.ComponentModel.CancelEventHandler handle = null;
-                        handle = (object imageClosingSender, System.ComponentModel.CancelEventArgs ImageClosingE) =>
-                        {
-                            g_lICImages[g_nCurrQuestion].imageWindow_Closing(l_picBox, imageClosingSender, ImageClosingE, handle);
-                            SetControlsIsEnabled(true);
-                            ResizeAndAdjust();
-                        };
-                        ImageClass.SetWinClosingHandle(handle);
-                        
-                        ResizeAndAdjust();
-                    }
+                    ImageClass.pictureOpenMethods += ResizeAndAdjust;
+                    ImageClass.pictureOpenMethods += DisableControls;
+
+                    ImageClass.pictureCloseMethods += ResizeAndAdjust;
+                    ImageClass.pictureCloseMethods += EnableControls;
+
+                    currentImage.picBox_MouseUp(mouseUpSender, mouseUpE);
                 };
 
             ResizeAndAdjust();
-        }
-
-        
-
-        void CreateTabItem_GotFocus(object sender, RoutedEventArgs e)
-        {
-            g_nCurrQuestion = tabControl.SelectedIndex - 1;
         }
 
         /// <summary>

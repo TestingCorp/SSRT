@@ -15,6 +15,10 @@ namespace Secret_Project_WPF
     /// </summary>
     public class ImageClass
     {
+        public delegate void MethodsToExecute();
+        public static MethodsToExecute pictureOpenMethods = null;
+        public static MethodsToExecute pictureCloseMethods = null;
+
         /// <summary>
         /// A Control to store the Windows.Forms PictureBox object
         /// </summary>
@@ -105,7 +109,7 @@ namespace Secret_Project_WPF
         }
 
         /// <summary>
-        /// Handler for mouseDown event of the picture in each question
+        /// Handler for mouseDown event of the picture
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -120,15 +124,15 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public System.Windows.Forms.PictureBox picBox_MouseUp(object sender,
-                                                              System.Windows.Forms.MouseEventArgs e)
+        public void picBox_MouseUp(object sender,
+                                   System.Windows.Forms.MouseEventArgs e)
         {
             TimeSpan timeSinceDown = DateTime.Now - downTime;
             if (timeSinceDown.TotalMilliseconds >= 500 ||
                 e.Button != System.Windows.Forms.MouseButtons.Left ||
                 this.picBox.Image == null)
             {
-                return null;
+                return;
             }
             this.Hide();
 
@@ -140,8 +144,8 @@ namespace Secret_Project_WPF
             l_picBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 
             imageWindow.Height = 500D;
-            l_picBox.Height = (int)imageWindow.Height;
             double imageRatio = (double)(img.Width) / img.Height;
+            l_picBox.Height = (int)imageWindow.Height;
             l_picBox.Width = (int)(imageRatio * l_picBox.Height);
             imageWindow.Width = l_picBox.Width;
 
@@ -162,25 +166,26 @@ namespace Secret_Project_WPF
             imageWindow.Icon = wpfBitmap;
 
             //Show the image window
+            imageWindow.Closing += imageWindow_Closing;
             imageWindow.Show();
-
-            //return the PictureBox object in order for it to be emptied after closing the window
-            return l_picBox;
+            if(pictureOpenMethods != null) pictureOpenMethods();
+            pictureOpenMethods = null;
         }
 
-        public void imageWindow_Closing(System.Windows.Forms.PictureBox picBox,
-                                 object sender,
-                                 System.ComponentModel.CancelEventArgs e,
-                                 System.ComponentModel.CancelEventHandler handler)
+        public void imageWindow_Closing(object sender,
+                                        System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
-            (sender as Window).Closing -= handler;
+            (sender as Window).Closing -= imageWindow_Closing;
             (sender as Window).Hide();
 
+            System.Windows.Forms.PictureBox picBox = (((sender as Window).Content as WindowsFormsHost).Child as System.Windows.Forms.PictureBox);
             System.Drawing.Image img = picBox.Image;
             picBox.Image = null;
             this.picBox.Image = img;
             this.Show();
+            if (pictureCloseMethods != null) pictureCloseMethods();
+            pictureCloseMethods = null;
         }
     }
 }

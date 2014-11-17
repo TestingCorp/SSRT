@@ -69,8 +69,6 @@ namespace Secret_Project_WPF
         /// </summary>
         public ObservableCollection<TabItem> g_lTITabs = null;
 
-        
-
         /// <summary>
         /// The Images used in the questions
         /// </summary>
@@ -158,6 +156,10 @@ namespace Secret_Project_WPF
             {
                 g_lTITabs.RemoveAt(g_lTITabs.Count - 1);
             }
+            while (g_lICImages.Count > 0)
+            {
+                g_lICImages.RemoveAt(g_lICImages.Count - 1);
+            }
 
             g_l2rbAnswers = new List<List<RadioButton>>();
             g_lQCQuestions = new List<QuestionClass>();
@@ -198,6 +200,8 @@ namespace Secret_Project_WPF
 
             while (g_lTITabs.Count > 1)
                 g_lTITabs.RemoveAt(g_lTITabs.Count - 1);
+            while (g_lICImages.Count > 0)
+                g_lICImages.RemoveAt(g_lICImages.Count - 1);
 
             g_l2rbAnswers = new List<List<RadioButton>>();
             g_lQCQuestions = new List<QuestionClass>();
@@ -390,25 +394,32 @@ namespace Secret_Project_WPF
             return sRes;
         }
 
-        private void SetControlsIsEnabled(bool enabled)
+        private void EnableControls()
         {
-            UIElementCollection children = (g_lTITabs[g_nCurrQuestion+1].Content as Grid).Children;
-            for (int i = 0; i < children.Count; i++)
+            if (state != TestState.DoingNothing)
             {
-                if (children[i] is Button) (children[i] as Button).IsEnabled = enabled;
+                UIElementCollection children = (g_lTITabs[g_nCurrQuestion + 1].Content as Grid).Children;
+                for (int i = 0; i < children.Count; i++)
+                {
+                    if (children[i] is Button) (children[i] as Button).IsEnabled = true;
+                }
             }
             for (int i = 0; i < g_lTITabs.Count; i++)
             {
-                g_lTITabs[i].IsEnabled = enabled;
+                g_lTITabs[i].IsEnabled = true;
             }
         }
 
         private void DisableControls()
         {
-            UIElementCollection children = (g_lTITabs[g_nCurrQuestion].Content as Grid).Children;
+            UIElementCollection children = (g_lTITabs[g_nCurrQuestion + 1].Content as Grid).Children;
             for (int i = 0; i < children.Count; i++)
             {
                 if (children[i] is Button) (children[i] as Button).IsEnabled = false;
+            }
+            for (int i = 0; i < g_lTITabs.Count; i++)
+            {
+                g_lTITabs[i].IsEnabled = false;
             }
         }
 
@@ -433,21 +444,18 @@ namespace Secret_Project_WPF
                     (g_lTITabs[i].Content as Grid).Margin = new Thickness(0, -5, 0, 0);
                     UIElementCollection children = (g_lTITabs[i].Content as Grid).Children;
                     double nImgWidth = 0.0d;
-                    for (int j = 0; j < children.Count; j++)
+                    if (i != 0 &&
+                        g_lICImages[i-1].picBox.Image != null)
                     {
-                        if (children[j] is WindowsFormsHost)
-                            if ((children[j] as WindowsFormsHost).Child.Size.IsEmpty == false &&
-                                ((children[j] as WindowsFormsHost).Child as System.Windows.Forms.PictureBox).Image != null)
-                            {
-                                nImgWidth = (children[j] as WindowsFormsHost).Child.Size.Width;
-                                (children[j] as WindowsFormsHost).Margin = new Thickness(tabControl.Width - nImgWidth - 15, 9, 0, 0);
-                                //(children[j] as Image).Margin = new Thickness(tabControl.Width - nImgWidth - 15, 9, 0, 0);
-                            }
-
+                        nImgWidth = g_lICImages[i-1].picBox.Width;
+                        g_lICImages[i-1].wfh.Margin = new Thickness(tabControl.Width - nImgWidth - 15, 9, 0, 0);
                     }
                     for (int j = 0; j < children.Count; j++)
                     {
+
                         string sID = AutomationProperties.GetAutomationId(children[j]);
+                        double dValue2 = 0;
+                        double dValue = 0;
                         if (i == 0)
                         {
                             if (sID == "button_create")
@@ -459,8 +467,6 @@ namespace Secret_Project_WPF
                         }
                         else if (state == TestState.CreatingTest)
                         {
-                            double dValue = 0;
-                            double dValue2 = 0;
                             if (sID == "textbox_question")
                             {
                                 dValue = tabControl.Width - 30 - nImgWidth;
@@ -534,20 +540,22 @@ namespace Secret_Project_WPF
                         }
                         else if (state == TestState.DoingTest)
                         {
-                            if (children[j] is TextBlock)
+                            if (sID == "textblock_question")
                             {
-                                if ((children[j] as TextBlock).Margin.Top == 10)
-                                {
-                                    (children[j] as TextBlock).Width = tabControl.Width - 30;
-                                }
+                                dValue = tabControl.Width - 30 - nImgWidth;
+                                if (dValue < 0) dValue = 0;
+                                (children[j] as TextBlock).Width = dValue;
                             }
-                            else if (children[j] is Button)
+                            else if (sID == "radiobutton_answer")
                             {
-                                if (sID == "button_ready")
-                                {
-
-                                    (children[j] as Button).Margin = new Thickness(tabControl.Width - 100, tabControl.Height - 70, 0, 0);
-                                }
+                                dValue = tabControl.Width - 30 - nImgWidth;
+                                if (dValue < 0) dValue = 0;
+                                (children[j] as RadioButton).Width = tabControl.Width - 30;
+                            }
+                            else if (sID == "button_ready")
+                            {
+                                (children[j] as Button).Margin =
+                                    new Thickness(tabControl.Width - 100, tabControl.Height - 70, 0, 0);
                             }
                         }
                     }

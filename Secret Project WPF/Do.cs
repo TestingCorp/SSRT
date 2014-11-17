@@ -33,6 +33,7 @@ namespace Secret_Project_WPF
             }
 
             TextBlock tblQuestion = new TextBlock();
+            AutomationProperties.SetAutomationId(tblQuestion, "textblock_question");
             tblQuestion.HorizontalAlignment = HorizontalAlignment.Left;
             tblQuestion.VerticalAlignment = VerticalAlignment.Top;
             tblQuestion.Width = 420;
@@ -51,6 +52,7 @@ namespace Secret_Project_WPF
             for (int i = 0; i < Math.Min(QCQuestion.AnswersCount(), 4); i++)
             {
                 g_l2rbAnswers[nQuestionNumber].Add(new RadioButton());
+                AutomationProperties.SetAutomationId(g_l2rbAnswers[nQuestionNumber][i], "radiobutton_answer");
                 g_l2rbAnswers[nQuestionNumber][i].Content = QCQuestion.GetAnswer(i);
                 g_l2rbAnswers[nQuestionNumber][i].HorizontalAlignment = HorizontalAlignment.Left;
                 g_l2rbAnswers[nQuestionNumber][i].VerticalAlignment = VerticalAlignment.Top;
@@ -67,6 +69,20 @@ namespace Secret_Project_WPF
             g_lTITabs.Add(ti);
             ti.GotFocus += DoTabItem_GotFocus;
             ti.Header = String.Format("Въпрос {0}", (tc.Items.Count - 1 < 1) ? 1 : (tc.Items.Count - 1));
+
+            ImageClass currentImage = g_lICImages[nQuestionNumber];
+            currentImage.picBox.MouseDown += ImageClass.picBox_MouseDown;
+            currentImage.picBox.MouseUp += /*picBox_MouseUp*/
+                (object mouseUpSender, System.Windows.Forms.MouseEventArgs mouseUpE) =>
+                {
+                    ImageClass.pictureOpenMethods += ResizeAndAdjust;
+                    ImageClass.pictureOpenMethods += DisableControls;
+
+                    ImageClass.pictureCloseMethods += ResizeAndAdjust;
+                    ImageClass.pictureCloseMethods += EnableControls;
+
+                    currentImage.picBox_MouseUp(mouseUpSender, mouseUpE);
+                };
         }
 
         void DoButtonReady_Click(object sender, RoutedEventArgs e)
