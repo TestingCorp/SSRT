@@ -540,17 +540,18 @@ namespace Secret_Project_WPF
                         }
                         else if (state == TestState.DoingTest)
                         {
-                            if (sID == "textblock_question")
+                            if (sID == "scrollviewer_question")
                             {
                                 dValue = tabControl.Width - 30 - nImgWidth;
                                 if (dValue < 0) dValue = 0;
-                                (children[j] as TextBlock).Width = dValue;
+                                (children[j] as ScrollViewer).Width = dValue;
+                                ((children[j] as ScrollViewer).Content as TextBlock).Width = dValue-8;
                             }
                             else if (sID == "radiobutton_answer")
                             {
                                 dValue = tabControl.Width - 30 - nImgWidth;
                                 if (dValue < 0) dValue = 0;
-                                (children[j] as RadioButton).Width = tabControl.Width - 30;
+                                (children[j] as RadioButton).Width = dValue;
                             }
                             else if (sID == "button_ready")
                             {
@@ -569,6 +570,4 @@ namespace Secret_Project_WPF
             }
         }
     }
-
-
 }

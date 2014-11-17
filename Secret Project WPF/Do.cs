@@ -32,16 +32,20 @@ namespace Secret_Project_WPF
                 gr.Children.Add(btReady);
             }
 
+            ScrollViewer sv = new ScrollViewer();
+            sv.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            sv.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
             TextBlock tblQuestion = new TextBlock();
-            AutomationProperties.SetAutomationId(tblQuestion, "textblock_question");
-            tblQuestion.HorizontalAlignment = HorizontalAlignment.Left;
-            tblQuestion.VerticalAlignment = VerticalAlignment.Top;
-            tblQuestion.Width = 420;
-            tblQuestion.Height = 80;
-            tblQuestion.Margin = new Thickness(10, 10, 0, 0);
+            sv.Content = tblQuestion;
+            AutomationProperties.SetAutomationId(sv, "scrollviewer_question");
+            sv.HorizontalAlignment = HorizontalAlignment.Left;
+            sv.VerticalAlignment = VerticalAlignment.Top;
+            tblQuestion.Width = 50;
+            sv.Height = 50;
+            sv.Margin = new Thickness(10, 10, 0, 0);
             tblQuestion.Text = QCQuestion.GetQuestion();
             tblQuestion.TextWrapping = TextWrapping.Wrap;
-            gr.Children.Add(tblQuestion);
+            gr.Children.Add(sv);
 
             //List<RadioButton> lrbAnswers = new List<RadioButton>(4);
             if (g_l2rbAnswers[nQuestionNumber].Count != 0)
@@ -52,6 +56,10 @@ namespace Secret_Project_WPF
             for (int i = 0; i < Math.Min(QCQuestion.AnswersCount(), 4); i++)
             {
                 g_l2rbAnswers[nQuestionNumber].Add(new RadioButton());
+                //ScrollViewer svv = new ScrollViewer();
+                //svv.Height = 40;
+                //svv.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
+                //svv.Content = g_l2rbAnswers[nQuestionNumber][i];
                 AutomationProperties.SetAutomationId(g_l2rbAnswers[nQuestionNumber][i], "radiobutton_answer");
                 g_l2rbAnswers[nQuestionNumber][i].Content = QCQuestion.GetAnswer(i);
                 g_l2rbAnswers[nQuestionNumber][i].HorizontalAlignment = HorizontalAlignment.Left;
@@ -59,6 +67,7 @@ namespace Secret_Project_WPF
                 g_l2rbAnswers[nQuestionNumber][i].Height = 20;
                 g_l2rbAnswers[nQuestionNumber][i].Width = 420;
                 g_l2rbAnswers[nQuestionNumber][i].Margin = new Thickness(10, 70 + i * 25, 0, 0);
+                //gr.Children.Add(g_l2rbAnswers[nQuestionNumber][i]);
                 gr.Children.Add(g_l2rbAnswers[nQuestionNumber][i]);
             }
             gr.Children.Add(g_lICImages[nQuestionNumber].wfh);
