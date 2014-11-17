@@ -481,6 +481,17 @@ namespace Secret_Project_WPF
                                     dValue = 0;
                                 }
                                 (children[j] as TextBox).Margin = new Thickness(10, dValue, 0, 0);
+                                //MessageBox.Show((children[j] as TextBox).Width.ToString());
+                            }
+                            else if (sID == "textbox_timer")
+                            {
+                                dValue = tabControl.Height - 70;
+                                if (dValue < 0)
+                                {
+                                    dValue = 0;
+                                }
+                                dValue2 = 10 + 87 + 40;
+                                (children[j] as TextBox).Margin = new Thickness(dValue2, dValue, 0, 0);
                             }
                             else if (sID.Length > 14 && sID.Substring(0, 14) == "textbox_answer")
                             {

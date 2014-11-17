@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Forms.Integration;
+using System.Text.RegularExpressions;
 
 namespace Secret_Project_WPF
 {
@@ -130,10 +131,21 @@ namespace Secret_Project_WPF
                     tbPoints.HorizontalAlignment = HorizontalAlignment.Left;
                     tbPoints.VerticalAlignment = VerticalAlignment.Top;
                     tbPoints.Text = "[брой точки]";
-                    //tbPoints.Margin = new Thickness(10, tabControl.Height - 70, 0, 0);
+                    tbPoints.Margin = new Thickness(10, tabControl.Height - 70, 0, 0);
                     tbPoints.GotFocus += CreateTextBox_GotFocus;
                     tbPoints.LostFocus += CreateTextBox_LostFocus;
                     gr.Children.Add(tbPoints);
+
+                    TextBox timer = new TextBox();
+                    AutomationProperties.SetAutomationId(timer, "textbox_timer");
+                    timer.Width = 87;
+                    timer.Height = 25;
+                    timer.HorizontalAlignment = HorizontalAlignment.Left;
+                    timer.VerticalAlignment = VerticalAlignment.Top;
+                    timer.Text = "[време (мин:сек)]";
+                    timer.GotFocus += CreateTextBox_GotFocus;
+                    timer.LostFocus += CreateTextBox_LostFocus;
+                    gr.Children.Add(timer);
                 }
             }
 
@@ -365,6 +377,7 @@ namespace Secret_Project_WPF
             string sText = (sender as TextBox).Text;
             if (sText == "[въпрос]" ||
                 sText == "[брой точки]" ||
+                sText == "[време (мин:сек)]" ||
                 sText.Length > 8 &&
                 sText.Substring(0, 9) == "[отговор ")
                 (sender as TextBox).Text = String.Empty;
@@ -429,6 +442,27 @@ namespace Secret_Project_WPF
                 }
                 //Set the points equal to the texbox'es content
                 g_lQCQuestions[g_nCurrQuestion].SetPoints(nRes);
+            }
+            else if (sID == "textbox_timer")
+            {
+                Regex r = new Regex("[0-90-9]\\:[0-90-9]");
+                Match m = r.Match(sContent);
+                if (m.Success)
+                {
+                    int minutes = Int32.Parse(sContent.SubstringCharToChar(':', 0, true));
+                    int seconds = Int32.Parse(sContent.Substring(sContent.IndexOf(':') + 1));
+
+                    QuestionClass.time = new TimeSpan(0, minutes, seconds);
+                    MessageBox.Show(QuestionClass.time.Seconds.ToString());
+                    MessageBox.Show(QuestionClass.time.Minutes.ToString());
+                } else
+                {
+                    //if it fails or the number is not positive set the textbox'es content the appropriate default value
+                    (sender as TextBox).Text = "[време (мин:сек)]";
+
+                    //Set the points equal to the texbox'es content
+                    // g_lQCQuestions[g_nCurrQuestion].SetPoints(nRes);
+                }
             }
         }
     }
