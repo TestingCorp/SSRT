@@ -18,6 +18,28 @@ namespace Secret_Project_WPF
 {
     public partial class MainWindow : Window
     {
+        public static System.Timers.Timer timer = new System.Timers.Timer();
+        public static void RunTimer()
+        {
+            timer.Interval = 1000;
+            timer.Elapsed += timer_Elapsed;
+            timer.Start();
+        }
+
+        static void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+             time = time.Subtract(new TimeSpan(0,0,1));
+            foreach (var lab in listOfLabels)
+            {
+                lab.Content = time.ToString();
+            }
+        }
+
+        public static TimeSpan time;
+
+        public static List<Label> listOfLabels = new List<Label>();
+
+
         /// <summary>
         /// While creating a test when the last tab AddQuestion is selected this method creates and adds a new question to the TabControl
         /// </summary>
@@ -445,16 +467,16 @@ namespace Secret_Project_WPF
             }
             else if (sID == "textbox_timer")
             {
-                Regex r = new Regex("[0-90-9]\\:[0-90-9]");
+                Regex r = new Regex("\\d\\d\\:\\d\\d");
                 Match m = r.Match(sContent);
                 if (m.Success)
                 {
                     int minutes = Int32.Parse(sContent.SubstringCharToChar(':', 0, true));
                     int seconds = Int32.Parse(sContent.Substring(sContent.IndexOf(':') + 1));
 
-                    QuestionClass.time = new TimeSpan(0, minutes, seconds);
-                    MessageBox.Show(QuestionClass.time.Seconds.ToString());
-                    MessageBox.Show(QuestionClass.time.Minutes.ToString());
+                    time = new TimeSpan(0, minutes, seconds);
+                    MessageBox.Show(time.Seconds.ToString());
+                    MessageBox.Show(time.Minutes.ToString());
                 } else
                 {
                     //if it fails or the number is not positive set the textbox'es content the appropriate default value

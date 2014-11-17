@@ -65,20 +65,7 @@ namespace Secret_Project_WPF
             nPoints = points;
         }
 
-        public static System.Timers.Timer timer = new System.Timers.Timer();
-        public static void RunTimer()
-        {
-            timer.Interval = 1000;
-            timer.Elapsed += timer_Elapsed;
-            timer.Start();
-        }
-
-        static void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {   
-            //accessing the object while doing the test
-        }
-
-        public static TimeSpan time;
+       
 
         /// <summary>
         /// Gets the number of answers currently stored in the list of answers.

@@ -249,6 +249,8 @@ namespace Secret_Project_WPF
             g_nCurrQuestion = 0;
             state = TestState.DoingTest;
             ResizeAndAdjust();
+
+            RunTimer();
         }
 
         /// <summary>

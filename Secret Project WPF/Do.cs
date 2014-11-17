@@ -61,6 +61,14 @@ namespace Secret_Project_WPF
                 g_l2rbAnswers[nQuestionNumber][i].Margin = new Thickness(10, 70 + i * 25, 0, 0);
                 gr.Children.Add(g_l2rbAnswers[nQuestionNumber][i]);
             }
+            listOfLabels.Add(new Label());
+            Label label = listOfLabels[listOfLabels.Count - 1];
+            label.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+            label.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+            label.Margin = new Thickness(tabControl.Width - 180, tabControl.Height - 70, 0, 0);
+            label.Content = "dsssasa";
+
+            gr.Children.Add(label);
             gr.Children.Add(g_lICImages[nQuestionNumber].wfh);
             g_lICImages[nQuestionNumber].Show();
             TabItem ti = new TabItem();
