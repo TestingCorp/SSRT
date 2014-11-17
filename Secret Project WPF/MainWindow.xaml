@@ -4,13 +4,12 @@
         Title="Система за създаване и решаване на тестове" Width="455" Height="300"
         >
     <Window.Resources>
-        <!-- Globbal properties -->
         <SolidColorBrush x:Key="ScrollThumbBrush" Color="#85A694" />
         <SolidColorBrush x:Key="ScrollBackroundBrush" Color="#A4CDB7"/>
-        
+
         <SolidColorBrush x:Key="TabControlBackroundBrush" Color="#D6FFE9"/>
         <SolidColorBrush x:Key="TabControlBorderBrush" Color="#A4CDB7"/>
-        
+
         <SolidColorBrush x:Key="TabBackgroundBrush" Color="#236A62"/>
         <SolidColorBrush x:Key="TabBackgroundBrush_whenActive" Color="#77CDC4"/>
         <SolidColorBrush x:Key="TabBorderBrush" Color="#A4CDB7"/>
@@ -31,6 +30,7 @@
         <CornerRadius x:Key="TabBorderRadius" TopLeft="7" TopRight="7" BottomRight="0" BottomLeft="0"/>
         <CornerRadius x:Key="TextBoxBorderRadius" TopLeft="5" TopRight="5" BottomRight="5" BottomLeft="5"/>
 
+        
         <!-- Thumb Style -->
         <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
 
@@ -42,60 +42,87 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Thumb}">
                         <Border
-          CornerRadius="{StaticResource ThumbBorderRadius}"
+                            CornerRadius="{StaticResource ThumbBorderRadius}"
                             Margin="0,1,0,1"
-          Background="{StaticResource ScrollThumbBrush}"/>
+                            Background="{StaticResource ScrollThumbBrush}"/>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
-        <!-- ScrollBar Style -->
-        <Style x:Key="ScrollBarStyle" TargetType="{x:Type ScrollBar}">
+        <ControlTemplate x:Key="HorizontalScrollBarTemplate" TargetType="{x:Type ScrollBar}">
+            <Grid Background="{StaticResource ScrollBackroundBrush}">
+                <Track Name="PART_Track">
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource ScrollBarThumb}"/>
+                    </Track.Thumb>
+                </Track>
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="VerticalScrollBarTemplate" TargetType="{x:Type ScrollBar}">
+            <Grid>
+                <Border CornerRadius="5" Background="{StaticResource ScrollBackroundBrush}">
+                    <Track Name="PART_Track" IsDirectionReversed="True">
+                        <Track.Thumb>
+                            <Thumb Style="{StaticResource ScrollBarThumb}"/>
+                        </Track.Thumb>
+                    </Track>
+                </Border>
+            </Grid>
+        </ControlTemplate>
+       
+        <!-- Style for overall  ScrollBar -->
+        <Style x:Key="{x:Type ScrollBar}" TargetType="ScrollBar">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
-            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
             <Style.Triggers>
                 <Trigger Property="Orientation" Value="Horizontal">
                     <Setter Property="Width" Value="Auto"/>
-                    <Setter Property="Height" Value="10" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type ScrollBar}">
-                                <Grid Background="{StaticResource ScrollBackroundBrush}">
-                                    <Track Name="PART_Track">
-                                        <Track.Thumb>
-                                            <Thumb Style="{StaticResource ScrollBarThumb}"/>
-                                        </Track.Thumb>
-                                    </Track>
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
+                    <Setter Property="Height" Value="9" />
+                    <Setter Property="Template" Value="{StaticResource HorizontalScrollBarTemplate}"/>
+                </Trigger>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Width" Value="7"/>
+                    <Setter Property="Height" Value="Auto" />
+                    <Setter Property="Margin" Value="1, 0, 0, 0"/>
+                    <Setter Property="Template" Value="{StaticResource VerticalScrollBarTemplate}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- ScrollViewer Style -->
-        <Style x:Key="ScrollViewerStyle" TargetType="{x:Type ScrollViewer}">
-            <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Focusable" Value="False"/>
+        <!-- Style for overall  ScrollViewer -->
+        <Style TargetType="ScrollViewer" x:Name="scrollview">
+            <Setter Property="OverridesDefaultStyle" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollViewer}">
                         <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="19px"/>
+                                <RowDefinition />
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <ScrollContentPresenter/>
+                            <ScrollContentPresenter Grid.Column="0"/>
+
                             <ScrollBar Name="PART_HorizontalScrollBar"
                                        Orientation="Horizontal"
                                        Grid.Row="1"
                                        Value="{TemplateBinding HorizontalOffset}"
                                        Maximum="{TemplateBinding ScrollableWidth}"
                                        ViewportSize="{TemplateBinding ViewportWidth}"
-                                       Style="{StaticResource ScrollBarStyle}"/>
+                                       Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+                            <ScrollBar Name="PART_VerticalScrollBar"
+                                       Value="{TemplateBinding VerticalOffset}" Grid.Column="1"
+                                       Grid.Row="0"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
@@ -168,13 +195,14 @@
                                     CornerRadius="6,6,0,0"
                                     Panel.ZIndex="4"
                                     Grid.Row="0">
-                                <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                                <ScrollViewer HorizontalScrollBarVisibility="Visible" 
                                               VerticalScrollBarVisibility="Hidden"
-                                              Style="{StaticResource ScrollViewerStyle}">
+                                              Height="28">
                                     <TabPanel x:Name="HeaderPanel"
                                               KeyboardNavigation.TabIndex="1"
                                               Height="25px"
-                                              IsItemsHost="true"/>
+                                              IsItemsHost="true"
+                                              />
                                 </ScrollViewer>
                             </Border>
                             <Border Name="Border"
@@ -194,40 +222,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- TexBox Style -->
-        <Style TargetType="{x:Type TextBox}">
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-            <Setter Property="OverridesDefaultStyle" Value="True" />
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="MinWidth" Value="120" />
-            <Setter Property="MinHeight" Value="20" />
-            <Setter Property="AllowDrop" Value="true" />
-            <Setter Property="Foreground" Value="{StaticResource TextBoxForegroundBrush}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TextBoxBase}">
-                        <Border CornerRadius="{StaticResource TextBoxBorderRadius}"
-                                BorderThickness="1"
-                                Background="{StaticResource TextBoxBackroundBrush}"
-                                BorderBrush="{StaticResource TextBoxBorderBrush}">
-                            <ScrollViewer Margin="0"
-                                          x:Name="PART_ContentHost"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="Black"/>
-        </Style>
-
-        <!-- RadioButton Style -->
-        <Style TargetType="RadioButton">
-            <Setter Property="Focusable" Value="False"/>
-        </Style>
-
     </Window.Resources>
 
     <Grid>
