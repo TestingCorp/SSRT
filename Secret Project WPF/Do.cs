@@ -35,6 +35,7 @@ namespace Secret_Project_WPF
             ScrollViewer sv = new ScrollViewer();
             sv.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             sv.HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            sv.Focusable = false;
             TextBlock tblQuestion = new TextBlock();
             sv.Content = tblQuestion;
             AutomationProperties.SetAutomationId(sv, "scrollviewer_question");
