@@ -75,7 +75,7 @@ namespace Secret_Project_WPF
             label.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             label.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             label.Margin = new Thickness(tabControl.Width - 180, tabControl.Height - 70, 0, 0);
-            label.Content = "dsssasa";
+            label.Content = QuestionClass.time.ToString();
 
             gr.Children.Add(label);
             gr.Children.Add(g_lICImages[nQuestionNumber].wfh);
