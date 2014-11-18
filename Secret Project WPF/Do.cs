@@ -104,6 +104,11 @@ namespace Secret_Project_WPF
 
         void DoButtonReady_Click(object sender, RoutedEventArgs e)
         {
+            Ready();
+        }
+
+        void Ready()
+        {
             int score = 0, totalScore = 0, nNumberOfRightAnswers = 0;
             for (int i = 0; i < g_lQCQuestions.Count; i++)
             {
@@ -114,7 +119,7 @@ namespace Secret_Project_WPF
             }
             if ((g_lTITabs[g_lTITabs.Count - 1].Content as Grid) != null)
             {
-                UIElementCollection children = (g_lTITabs[g_lTITabs.Count-1].Content as Grid).Children;
+                UIElementCollection children = (g_lTITabs[g_lTITabs.Count - 1].Content as Grid).Children;
                 for (int i = 0; i < children.Count; i++)
                 {
                     if (children[i] is Button &&

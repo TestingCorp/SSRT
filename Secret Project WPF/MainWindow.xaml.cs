@@ -256,6 +256,7 @@ namespace Secret_Project_WPF
             QuestionClass.timer.Elapsed +=
                 (object ElapsedSender, System.Timers.ElapsedEventArgs ElapsedE) =>
                     QuestionClass.timer_Elapsed(listOfLabels, this.Dispatcher, ElapsedSender, ElapsedE);
+            QuestionClass.onTimeOutExecute += Ready;
             QuestionClass.RunTimer();
         }
 

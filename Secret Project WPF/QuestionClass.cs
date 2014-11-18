@@ -101,11 +101,11 @@ namespace Secret_Project_WPF
                 {
                     lab.Content = time.ToString();
                 }
-            }));
-            if(time <= new TimeSpan(0,0,0))
-            {
                 if(onTimeOutExecute != null) onTimeOutExecute();
                 onTimeOutExecute = null;
+            }));
+            if(time <= TimeSpan.Zero)
+            {
                 StopTimer();
                 return;
             }
