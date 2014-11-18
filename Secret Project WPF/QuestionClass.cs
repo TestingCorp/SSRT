@@ -101,18 +101,18 @@ namespace Secret_Project_WPF
                 {
                     lab.Content = time.ToString();
                 }
-                if(onTimeOutExecute != null) onTimeOutExecute();
-                onTimeOutExecute = null;
-            }));
             if(time <= TimeSpan.Zero)
             {
+                StopTimer();
+                if(onTimeOutExecute != null) onTimeOutExecute();
+                onTimeOutExecute = null;
                 foreach (var label in listOfLabels)
                 {
                     label.Foreground = System.Windows.Media.Brushes.Red;
                 }
-                StopTimer();
                 return;
             }
+            }));
         }
 
 
