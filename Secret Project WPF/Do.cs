@@ -153,6 +153,7 @@ namespace Secret_Project_WPF
                 }
             }
             state = TestState.DoingNothing;
+            QuestionClass.StopTimer();
         }
 
         void DoTabItem_GotFocus(object sender, RoutedEventArgs e)
