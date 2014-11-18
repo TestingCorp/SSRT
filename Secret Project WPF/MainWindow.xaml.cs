@@ -438,8 +438,8 @@ namespace Secret_Project_WPF
         {
             try
             {
-                if (window1.ActualHeight < 300) window1.Height = 300;
-                if (window1.ActualWidth < 455) window1.Width = 455;
+                if (window1.ActualHeight < 400) window1.Height = 400;
+                if (window1.ActualWidth < 600) window1.Width = 600;
                 tabControl.Height = window1.ActualHeight - 45;
                 tabControl.Width = window1.ActualWidth - 30;
                 for (int i = 0; i < g_lTITabs.Count; i++)
@@ -498,7 +498,7 @@ namespace Secret_Project_WPF
                                 {
                                     dValue = 0;
                                 }
-                                dValue2 = 10 + 87 + 40;
+                                dValue2 = 10 + 87 + 10;
                                 (children[j] as TextBox).Margin = new Thickness(dValue2, dValue, 0, 0);
                             }
                             else if (sID.Length > 14 && sID.Substring(0, 14) == "textbox_answer")
@@ -559,17 +559,18 @@ namespace Secret_Project_WPF
                         }
                         else if (state == TestState.DoingTest)
                         {
-                            if (sID == "textblock_question")
+                            if (sID == "scrollviewer_question")
                             {
                                 dValue = tabControl.Width - 30 - nImgWidth;
                                 if (dValue < 0) dValue = 0;
-                                (children[j] as TextBlock).Width = dValue;
+                                (children[j] as ScrollViewer).Width = dValue;
+                                ((children[j] as ScrollViewer).Content as TextBlock).Width = dValue - 8;
                             }
                             else if (sID == "radiobutton_answer")
                             {
                                 dValue = tabControl.Width - 30 - nImgWidth;
                                 if (dValue < 0) dValue = 0;
-                                (children[j] as RadioButton).Width = tabControl.Width - 30;
+                                (children[j] as RadioButton).Width = dValue;
                             }
                             else if (sID == "button_ready")
                             {
@@ -588,6 +589,4 @@ namespace Secret_Project_WPF
             }
         }
     }
-
-
 }

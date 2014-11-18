@@ -143,7 +143,7 @@ namespace Secret_Project_WPF
 
                     TextBox timer = new TextBox();
                     AutomationProperties.SetAutomationId(timer, "textbox_timer");
-                    timer.Width = 87;
+                    timer.Width = 100;
                     timer.Height = 25;
                     timer.HorizontalAlignment = HorizontalAlignment.Left;
                     timer.VerticalAlignment = VerticalAlignment.Top;
