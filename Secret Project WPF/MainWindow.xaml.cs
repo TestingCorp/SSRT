@@ -94,6 +94,9 @@ namespace Secret_Project_WPF
             window1.SizeChanged += delegate { ResizeAndAdjust(); };
             window1.Closing += window1_Closing;
             window1.StateChanged += delegate { ResizeAndAdjust(); };
+            QuestionClass.timer.Elapsed +=
+                (object ElapsedSender, System.Timers.ElapsedEventArgs ElapsedE) =>
+                    QuestionClass.timer_Elapsed(listOfLabels, this.Dispatcher, ElapsedSender, ElapsedE);
         }
 
         void window1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -252,11 +255,9 @@ namespace Secret_Project_WPF
             g_nCurrQuestion = 0;
             state = TestState.DoingTest;
             ResizeAndAdjust();
-
-            QuestionClass.timer.Elapsed +=
-                (object ElapsedSender, System.Timers.ElapsedEventArgs ElapsedE) =>
-                    QuestionClass.timer_Elapsed(listOfLabels, this.Dispatcher, ElapsedSender, ElapsedE);
-            QuestionClass.onTimeOutExecute += () => MessageBox.Show("Времето ви изтече!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+            
+            QuestionClass.onTimeOutExecute += () =>
+                MessageBox.Show("Времето ви изтече!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
             QuestionClass.onTimeOutExecute += Ready;
             QuestionClass.RunTimer();
         }
