@@ -18,10 +18,7 @@ namespace Secret_Project_WPF
 {
     public partial class MainWindow : Window
     {
-
-
         public static List<Label> listOfLabels = new List<Label>();
-
 
         /// <summary>
         /// While creating a test when the last tab AddQuestion is selected this method creates and adds a new question to the TabControl
