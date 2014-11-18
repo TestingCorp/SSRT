@@ -16,11 +16,11 @@
         <SolidColorBrush x:Key="TabForegroundBrush" Color="White"/>
         <SolidColorBrush x:Key="TabForegroundBrush_whenActive" Color="Black"/>
 
-        <SolidColorBrush x:Key="TabBackgroundBrush_whenDisabled" Color="#000000"/>
-        <SolidColorBrush x:Key="TabBackgroundBrush_whenDisabled_whenActive" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TabBackgroundBrush_whenDisabled" Color="#605A66"/>
+        <SolidColorBrush x:Key="TabBackgroundBrush_whenDisabled_whenActive" Color="#E0E0E0"/>
         <SolidColorBrush x:Key="TabBorderBrush_whenDisabled" Color="#000000"/>
         <SolidColorBrush x:Key="TabForegroundBrush_whenDisabled" Color="White"/>
-        <SolidColorBrush x:Key="TabForegroundBrush_whenDisabled_whenActive" Color="Red"/>
+        <SolidColorBrush x:Key="TabForegroundBrush_whenDisabled_whenActive" Color="#EF2525"/>
 
         <SolidColorBrush x:Key="TextBoxBackroundBrush" Color="#FFFFDD"/>
         <SolidColorBrush x:Key="TextBoxForegroundBrush" Color="#000000"/>
