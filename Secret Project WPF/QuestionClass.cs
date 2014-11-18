@@ -106,6 +106,10 @@ namespace Secret_Project_WPF
             }));
             if(time <= TimeSpan.Zero)
             {
+                foreach (var label in listOfLabels)
+                {
+                    label.Foreground = System.Windows.Media.Brushes.Red;
+                }
                 StopTimer();
                 return;
             }

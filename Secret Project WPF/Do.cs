@@ -76,6 +76,7 @@ namespace Secret_Project_WPF
             label.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             label.Margin = new Thickness(tabControl.Width - 180, tabControl.Height - 70, 0, 0);
             label.Content = QuestionClass.time.ToString();
+            label.FontSize = 15;
 
             gr.Children.Add(label);
             gr.Children.Add(g_lICImages[nQuestionNumber].wfh);
