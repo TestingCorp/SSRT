@@ -241,7 +241,7 @@ namespace Secret_Project_WPF
             ResizeAndAdjust();
 
             QuestionClass.onTimeOutExecute += () =>
-                MessageBox.Show("Времето ви изтече!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Времето Ви изтече!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
             QuestionClass.onTimeOutExecute += Ready;
             QuestionClass.onTimeOutExecute += TimeOutLabelManage;
             QuestionClass.onTimerElapsedExecute +=

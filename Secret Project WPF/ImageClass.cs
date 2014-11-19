@@ -155,7 +155,7 @@ namespace Secret_Project_WPF
 
 
             //Set the image window's icon
-            System.Drawing.Icon iconHandle = Properties.Resources.icon;
+            System.Drawing.Icon iconHandle = WpfApplication1.Properties.Resources.icon;
             System.Drawing.Bitmap bitmap = iconHandle.ToBitmap();
             IntPtr hBitmap = bitmap.GetHbitmap();
 

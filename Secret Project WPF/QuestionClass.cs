@@ -248,6 +248,8 @@ namespace Secret_Project_WPF
         public static void StopTimer()
         {
             timer.Stop();
+            onTimeOutExecute = null;
+            onTimerElapsedExecute = null;
         }
 
         //Methods to execute when the time is over
@@ -266,10 +268,10 @@ namespace Secret_Project_WPF
                 if(onTimerElapsedExecute != null) onTimerElapsedExecute();
                 if (time <= TimeSpan.Zero)
                 {
-                    StopTimer();
                     if (onTimeOutExecute != null) onTimeOutExecute();
-                    onTimeOutExecute = null;
-                    onTimerElapsedExecute = null;
+                    StopTimer();
+                    //onTimeOutExecute = null;
+                    //onTimerElapsedExecute = null;
                     return;
                 }
             }));
