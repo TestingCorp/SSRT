@@ -626,8 +626,8 @@ namespace Secret_Project_WPF
             catch (Exception ex)
             {
                 string message = String.Format("Имаше грешка при оразмеряването! {0}", ex.Message);
-                MessageBox.Show(message);
-                MessageBox.Show(ex.StackTrace);
+                MessageBox.Show(message, "Внимание", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show(ex.StackTrace);
             }
         }
     }
