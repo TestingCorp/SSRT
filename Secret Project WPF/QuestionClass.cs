@@ -255,6 +255,10 @@ namespace Secret_Project_WPF
         public static void StopTimer()
         {
             timer.Stop();
+        }
+
+        public static void NulliftDelegates()
+        {
             onTimeOutExecute = null;
             onTimerElapsedExecute = null;
         }
@@ -275,8 +279,9 @@ namespace Secret_Project_WPF
                 if(onTimerElapsedExecute != null) onTimerElapsedExecute();
                 if (time <= TimeSpan.Zero)
                 {
-                    if (onTimeOutExecute != null) onTimeOutExecute();
                     StopTimer();
+                    if (onTimeOutExecute != null) onTimeOutExecute();
+                    NulliftDelegates();
                     //onTimeOutExecute = null;
                     //onTimerElapsedExecute = null;
                     return;
