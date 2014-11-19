@@ -28,6 +28,8 @@ namespace Secret_Project_WPF
         /// </summary>
         private List<AnswerClass> lACAnswers;
 
+        public static TimeSpan timeForTest { set; get; }
+
         /// <summary>
         /// An initialization constructor
         /// </summary>
@@ -167,6 +169,11 @@ namespace Secret_Project_WPF
             lACAnswers.Add(new AnswerClass());
         }
 
+        public static void SetTime(TimeSpan s)
+        {
+            timeForTest = s;
+        }
+
         /// <summary>
         /// Gets the number of the right answer from the list of answer objects.
         /// </summary>
@@ -181,7 +188,7 @@ namespace Secret_Project_WPF
             }
             catch (Exception e)
             {
-                MessageBox.Show(String.Format("GetRightAnswerIndex() trew an exception: {0}", e.Message));
+                MessageBox.Show(String.Format("GetRightAnswerIndex() trew an exception: {0}", e.Message), "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }
@@ -234,7 +241,7 @@ namespace Secret_Project_WPF
             }
             if (lrbAnswers.GetCheckedIndex() == null) return ISE_ErrorCode.NoRightAnswer;
             if (this.nPoints <= 0) return ISE_ErrorCode.NoPoints;
-            return ISE_ErrorCode.AllFine;
+                return ISE_ErrorCode.AllFine;
         }
 
         public static TimeSpan time { get; set; }

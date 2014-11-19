@@ -181,7 +181,7 @@ namespace Secret_Project_WPF
             var browseBut = sender as Button;
             if (browseBut.Content.Equals("-Изображение"))
             {
-                if (MessageBox.Show(String.Format("В момента имате добавено изображение! Сигурни ли сте, че желаете да го изтриете?"), "Внимание!", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show(String.Format("В момента имате добавено изображение! Сигурни ли сте, че желаете да го изтриете?"), "Внимание!", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
                     //g_lICImages[g_nCurrQuestion].img.Source = null;
                     g_lICImages[g_nCurrQuestion].picBox.Image.Dispose();
@@ -238,7 +238,7 @@ namespace Secret_Project_WPF
         void CreateButtonRemove_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show("Сигурни ли сте, че искате да изтриете този въпрос?", "Внимание!",
-                MessageBoxButton.YesNo) == MessageBoxResult.No) return;
+                MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No) return;
             g_lQCQuestions.RemoveAt(g_nCurrQuestion);
             g_l2rbAnswers.RemoveAt(g_nCurrQuestion);
             tabControl.SelectedIndex = 0;
@@ -266,19 +266,26 @@ namespace Secret_Project_WPF
                 switch (g_lQCQuestions[i].IsSomethingWrong(g_l2rbAnswers[i]))
                 {
                     case ISE_ErrorCode.NoAnswers:
-                        MessageBox.Show(String.Format("Не сте въвели нито един отговор при въпрос {0}!", i + 1));
+                        MessageBox.Show(String.Format("Не сте въвели нито един отговор при въпрос {0}!", i + 1), "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     case ISE_ErrorCode.NoQuestion:
-                        MessageBox.Show(String.Format("Не сте въвели въпрос при въпрос {0}!", i + 1));
+                        MessageBox.Show(String.Format("Не сте въвели въпрос при въпрос {0}!", i + 1), "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     case ISE_ErrorCode.NoRightAnswer:
-                        MessageBox.Show(String.Format("Не сте избрали верен отговор при въпрос {0}!", i + 1));
+                        MessageBox.Show(String.Format("Не сте избрали верен отговор при въпрос {0}!", i + 1), "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     case ISE_ErrorCode.NoPoints:
-                        MessageBox.Show(String.Format("Не сте въвели брой точки за верен отговор на въпрос {0}!", i + 1));
+                        MessageBox.Show(String.Format("Не сте въвели брой точки за верен отговор на въпрос {0}!", i + 1), "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     case ISE_ErrorCode.AllFine:
                         break;
+                }
+                if (QuestionClass.timeForTest == new TimeSpan(0, 0, 0))
+                {
+                    if (MessageBox.Show("Не сте избрали време за решаване на теста! Сигурни ли " +
+                        "сте, че не искате да задавате време?", "Внимание", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                        return;
+
                 }
             }
 
@@ -435,12 +442,13 @@ namespace Secret_Project_WPF
             {
                 Regex r = new Regex("\\d\\d\\:\\d\\d");
                 Match m = r.Match(sContent);
-                if (m.Success)
+                if (sContent.Length == 5 && m.Success && !sContent.Equals("00:00"))
                 {
                     int minutes = Int32.Parse(sContent.SubstringCharToChar(':', 0, true));
                     int seconds = Int32.Parse(sContent.Substring(sContent.IndexOf(':') + 1));
 
                     QuestionClass.time = new TimeSpan(0, minutes, seconds);
+                    QuestionClass.SetTime(new TimeSpan(0, minutes, seconds));
                 }
                 else
                 {
@@ -450,6 +458,7 @@ namespace Secret_Project_WPF
                     //Set the points equal to the texbox'es content
                     // g_lQCQuestions[g_nCurrQuestion].SetPoints(nRes);
                 }
+
             }
         }
     }

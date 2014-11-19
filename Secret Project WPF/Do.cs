@@ -139,7 +139,7 @@ namespace Secret_Project_WPF
                 }
             }
 
-            MessageBox.Show(String.Format("{0}/{1} верни отговора ({2}/{3} точки)", nNumberOfRightAnswers, g_lQCQuestions.Count, score.ToString(), totalScore.ToString()));
+            MessageBox.Show(String.Format("{0}/{1} верни отговора ({2}/{3} точки)", nNumberOfRightAnswers, g_lQCQuestions.Count, score.ToString(), totalScore.ToString()), "Резултат", MessageBoxButton.OK, MessageBoxImage.Information);
 
             for (int i = 0; i < g_lQCQuestions.Count; i++)
             {
@@ -163,6 +163,7 @@ namespace Secret_Project_WPF
             }
 
             state = TestState.DoingNothing;
+            
         }
 
         void TimeOutLabelManage()
