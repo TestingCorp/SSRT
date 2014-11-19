@@ -71,11 +71,13 @@ namespace Secret_Project_WPF
                 //gr.Children.Add(g_l2rbAnswers[nQuestionNumber][i]);
                 gr.Children.Add(g_l2rbAnswers[nQuestionNumber][i]);
             }
-            listOfLabels.Add(new Label());
-            Label label = listOfLabels[listOfLabels.Count - 1];
+
+            g_lLblTimeLeft.Add(new Label());
+            Label label = g_lLblTimeLeft[g_lLblTimeLeft.Count - 1];
+            AutomationProperties.SetAutomationId(label, "label_timeLeft");
             label.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             label.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            label.Margin = new Thickness(tabControl.Width - 180, tabControl.Height - 70, 0, 0);
+            
             label.Content = QuestionClass.time.ToString();
             label.FontSize = 15;
 
@@ -111,6 +113,8 @@ namespace Secret_Project_WPF
 
         void Ready()
         {
+            QuestionClass.StopTimer();
+
             int score = 0, totalScore = 0, nNumberOfRightAnswers = 0;
             for (int i = 0; i < g_lQCQuestions.Count; i++)
             {
@@ -119,6 +123,7 @@ namespace Secret_Project_WPF
                 totalScore += g_lQCQuestions[i].nPoints;
                 nNumberOfRightAnswers += Convert.ToInt32(bIsRightAnswerChecked);
             }
+
             if ((g_lTITabs[g_lTITabs.Count - 1].Content as Grid) != null)
             {
                 UIElementCollection children = (g_lTITabs[g_lTITabs.Count - 1].Content as Grid).Children;
@@ -129,10 +134,13 @@ namespace Secret_Project_WPF
                     {
                         (children[i] as Button).Content = String.Format("{0} точки", score);
                         (children[i] as Button).IsEnabled = false;
+                        break;
                     }
                 }
             }
+
             MessageBox.Show(String.Format("{0}/{1} верни отговора ({2}/{3} точки)", nNumberOfRightAnswers, g_lQCQuestions.Count, score.ToString(), totalScore.ToString()));
+
             for (int i = 0; i < g_lQCQuestions.Count; i++)
             {
                 int? nnChecked = g_l2rbAnswers[i].GetCheckedIndex(), nnRight = g_lQCQuestions[i].GetRightAnswerIndex();
@@ -145,6 +153,7 @@ namespace Secret_Project_WPF
                     g_l2rbAnswers[i][(int)nnRight].Foreground = Brushes.Green;
                 }
             }
+
             for (int i = 0; i < g_l2rbAnswers.Count; i++)
             {
                 for (int j = 0; j < g_l2rbAnswers[i].Count; j++)
@@ -152,8 +161,33 @@ namespace Secret_Project_WPF
                     g_l2rbAnswers[i][j].IsEnabled = false;
                 }
             }
+
             state = TestState.DoingNothing;
-            QuestionClass.StopTimer();
+        }
+
+        void TimeOutLabelManage()
+        {
+            for (int i = 1; i < g_lTITabs.Count; i++)
+            {
+                var children = (g_lTITabs[i].Content as Grid).Children;
+                for (int j = 0; j < children.Count; j++)
+                {
+                    string sID = AutomationProperties.GetAutomationId(children[j]);
+                    if (sID == "label_timeLeft")
+                    {
+                        (children[j] as Label).Foreground = Brushes.Red;
+                        break;
+                    }
+                }
+            }
+        }
+
+        void TimerElapsedLabelManage()
+        {
+            for (int i = 0; i < g_lLblTimeLeft.Count; i++)
+			{
+                g_lLblTimeLeft[i].Content = QuestionClass.time.ToString();
+			}
         }
 
         void DoTabItem_GotFocus(object sender, RoutedEventArgs e)

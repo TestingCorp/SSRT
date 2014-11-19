@@ -18,8 +18,6 @@ namespace Secret_Project_WPF
 {
     public partial class MainWindow : Window
     {
-        public static List<Label> listOfLabels = new List<Label>();
-
         /// <summary>
         /// While creating a test when the last tab AddQuestion is selected this method creates and adds a new question to the TabControl
         /// </summary>
@@ -283,12 +281,16 @@ namespace Secret_Project_WPF
                         break;
                 }
             }
+
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "MGTest files (.mgt)|*.mgt";
             saveFileDialog1.FilterIndex = 1;
+
             bool? nbClickedOK = saveFileDialog1.ShowDialog();
             if (nbClickedOK != true) return;
+
             QuestionClass.StopTimer();
+
             List<string> lsOutput;
             Encode(out lsOutput, g_lQCQuestions);
             List<string> enc = new List<string>();
@@ -297,6 +299,7 @@ namespace Secret_Project_WPF
                 string sOutput = lsOutput[i];
                 enc.Add(Encrypt(ref sOutput, "I like spagetti!"));
             }
+
             using (Stream fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write))
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
@@ -319,18 +322,14 @@ namespace Secret_Project_WPF
                         }
                         bw.Write(QuestionClass.time.Minutes);
                         bw.Write(QuestionClass.time.Seconds);
-
                     }
                 }
 
                 /*using (StreamWriter stream = new StreamWriter(saveFileDialog1.FileName))
                     stream.WriteLine(enc);*/
-                while (g_lTITabs.Count > 1)
-                    g_lTITabs.RemoveAt(g_lTITabs.Count - 1);
-                g_lQCQuestions = null;
-                g_l2rbAnswers = null;
-                //btCreate.IsEnabled = true;
                 state = TestState.DoingNothing;
+                ResetTest();
+                //btCreate.IsEnabled = true;
                 /*StreamReader streamR = new StreamReader("output.mgt");
                 string dec = Decrypt(streamR.ReadLine(), "I like spagetti!");
                 streamR.Close();*/

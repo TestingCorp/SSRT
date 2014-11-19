@@ -65,57 +65,6 @@ namespace Secret_Project_WPF
             nPoints = points;
         }
 
-        public static TimeSpan time { get; set; }
-        public static System.Timers.Timer timer = new System.Timers.Timer(1000);
-
-        public static void RunTimer()
-        {
-            timer.Start();
-        }
-
-        public static void StopTimer()
-        {
-            timer.Stop();
-        }
-
-
-        //Methods to execute when the time is over
-        /* Usage:
-         * onTimeOutExecute += Method;
-         * 
-         * for example:
-         * onTimeOutExecute += ResizeAndAdjust;
-         */
-        public delegate void OnTimeOutExecute();
-        public static OnTimeOutExecute onTimeOutExecute = null;
-
-        public static void timer_Elapsed(List<Label> listOfLabels,
-                                  System.Windows.Threading.Dispatcher dispatcher,
-                                  object sender,
-                                  System.Timers.ElapsedEventArgs e)
-        {
-            time = time.Subtract(new TimeSpan(0, 0, 1));
-            dispatcher.Invoke(new Action(() =>
-            {
-                foreach (var lab in listOfLabels)
-                {
-                    lab.Content = time.ToString();
-                }
-            if(time <= TimeSpan.Zero)
-            {
-                StopTimer();
-                if(onTimeOutExecute != null) onTimeOutExecute();
-                onTimeOutExecute = null;
-                foreach (var label in listOfLabels)
-                {
-                    label.Foreground = System.Windows.Media.Brushes.Red;
-                }
-                return;
-            }
-            }));
-        }
-
-
         /// <summary>
         /// Gets the number of answers currently stored in the list of answers.
         /// </summary>
@@ -286,6 +235,44 @@ namespace Secret_Project_WPF
             if (lrbAnswers.GetCheckedIndex() == null) return ISE_ErrorCode.NoRightAnswer;
             if (this.nPoints <= 0) return ISE_ErrorCode.NoPoints;
             return ISE_ErrorCode.AllFine;
+        }
+
+        public static TimeSpan time { get; set; }
+        public static System.Timers.Timer timer = new System.Timers.Timer(1000);
+
+        public static void RunTimer()
+        {
+            timer.Start();
+        }
+
+        public static void StopTimer()
+        {
+            timer.Stop();
+        }
+
+        //Methods to execute when the time is over
+        public delegate void OnTimeOutExecute();
+        public static OnTimeOutExecute onTimeOutExecute = null;
+        public delegate void OnTimerElapsedExecute();
+        public static OnTimerElapsedExecute onTimerElapsedExecute = null;
+
+        public static void timer_Elapsed(System.Windows.Threading.Dispatcher dispatcher,
+                                         object sender,
+                                         System.Timers.ElapsedEventArgs e)
+        {
+            time = time.Subtract(new TimeSpan(0, 0, 1));
+            dispatcher.Invoke(new Action(() =>
+            {
+                if(onTimerElapsedExecute != null) onTimerElapsedExecute();
+                if (time <= TimeSpan.Zero)
+                {
+                    StopTimer();
+                    if (onTimeOutExecute != null) onTimeOutExecute();
+                    onTimeOutExecute = null;
+                    onTimerElapsedExecute = null;
+                    return;
+                }
+            }));
         }
     }
 }

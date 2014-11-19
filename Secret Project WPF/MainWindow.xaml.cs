@@ -55,6 +55,11 @@ namespace Secret_Project_WPF
         TestState state = TestState.DoingNothing;
 
         /// <summary>
+        /// The tabs in the GUI. Used for data bindings with the TabControl
+        /// </summary>
+        public ObservableCollection<TabItem> g_lTITabs = null;
+
+        /// <summary>
         /// The questions currently in use.
         /// </summary>
         public List<QuestionClass> g_lQCQuestions = null;
@@ -65,14 +70,11 @@ namespace Secret_Project_WPF
         public List<List<RadioButton>> g_l2rbAnswers = null;
 
         /// <summary>
-        /// The tabs in the GUI. Used for data bindings with the TabControl
-        /// </summary>
-        public ObservableCollection<TabItem> g_lTITabs = null;
-
-        /// <summary>
         /// The Images used in the questions
         /// </summary>
         public List<ImageClass> g_lICImages = null;
+
+        public List<Label> g_lLblTimeLeft = null;
 
         /// <summary>
         /// The current question being done.
@@ -83,20 +85,19 @@ namespace Secret_Project_WPF
         {
             //tabControl = new TabControl();
             g_lTITabs = new ObservableCollection<TabItem>();
-            g_lICImages = new List<ImageClass>();
             //g_wImageWindow = new Window();
 
             InitializeComponent();
             CreateAndAddMainTab();
 
             tabControl.ItemsSource = g_lTITabs;
-            
+
             window1.SizeChanged += delegate { ResizeAndAdjust(); };
             window1.Closing += window1_Closing;
             window1.StateChanged += delegate { ResizeAndAdjust(); };
             QuestionClass.timer.Elapsed +=
                 (object ElapsedSender, System.Timers.ElapsedEventArgs ElapsedE) =>
-                    QuestionClass.timer_Elapsed(listOfLabels, this.Dispatcher, ElapsedSender, ElapsedE);
+                    QuestionClass.timer_Elapsed(this.Dispatcher, ElapsedSender, ElapsedE);
         }
 
         void window1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -155,24 +156,14 @@ namespace Secret_Project_WPF
                 if (MessageBox.Show(message, title, options, msgIcon) == MessageBoxResult.No) return;
             }
 
-            while (g_lTITabs.Count > 1)
-            {
-                g_lTITabs.RemoveAt(g_lTITabs.Count - 1);
-            }
-            while (g_lICImages.Count > 0)
-            {
-                g_lICImages.RemoveAt(g_lICImages.Count - 1);
-            }
-
-            g_l2rbAnswers = new List<List<RadioButton>>();
-            g_lQCQuestions = new List<QuestionClass>();
+            state = TestState.CreatingTest;
+            ResetTest();
 
             TabItem tiAdd = new TabItem();
             tiAdd.Header = "+Въпрос";
             tiAdd.GotFocus += CreateTabItemAdd_GotFocus;
             g_lTITabs.Add(tiAdd);
 
-            state = TestState.CreatingTest;
 
             tabControl.SelectedIndex = tabControl.Items.Count - 1;
         }
@@ -201,14 +192,8 @@ namespace Secret_Project_WPF
             bool? nbClickedOK = openFileDialog1.ShowDialog();
             if (nbClickedOK == false) return;
 
-            while (g_lTITabs.Count > 1)
-                g_lTITabs.RemoveAt(g_lTITabs.Count - 1);
-            while (g_lICImages.Count > 0)
-                g_lICImages.RemoveAt(g_lICImages.Count - 1);
-
-            g_l2rbAnswers = new List<List<RadioButton>>();
-            g_lQCQuestions = new List<QuestionClass>();
-            g_lICImages = new List<ImageClass>();
+            state = TestState.DoingTest;
+            ResetTest();
 
             string sInput = String.Empty;
             using (FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read))
@@ -253,13 +238,44 @@ namespace Secret_Project_WPF
             }
             tabControl.SelectedIndex = 1;
             g_nCurrQuestion = 0;
-            state = TestState.DoingTest;
             ResizeAndAdjust();
-            
+
             QuestionClass.onTimeOutExecute += () =>
                 MessageBox.Show("Времето ви изтече!", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
             QuestionClass.onTimeOutExecute += Ready;
+            QuestionClass.onTimeOutExecute += TimeOutLabelManage;
+            QuestionClass.onTimerElapsedExecute +=
+                new QuestionClass.OnTimerElapsedExecute(
+                    () =>
+                    {
+                        TimerElapsedLabelManage();
+                    });
             QuestionClass.RunTimer();
+        }
+
+        void ResetTest()
+        {
+            QuestionClass.StopTimer();
+            while (g_lTITabs.Count > 1)
+                g_lTITabs.RemoveAt(g_lTITabs.Count - 1);
+            if (state == TestState.DoingNothing)
+            {
+                g_l2rbAnswers = null;
+                g_lQCQuestions = null;
+                g_lICImages = null;
+                g_lLblTimeLeft = null;
+            }
+            else
+            {
+                g_l2rbAnswers = new List<List<RadioButton>>();
+                g_lQCQuestions = new List<QuestionClass>();
+                g_lICImages = new List<ImageClass>();
+                g_lLblTimeLeft = null;
+                if (state == TestState.DoingTest)
+                {
+                    g_lLblTimeLeft = new List<Label>();
+                }
+            }
         }
 
         /// <summary>
@@ -447,26 +463,30 @@ namespace Secret_Project_WPF
                 tabControl.Width = window1.ActualWidth - 30;
                 for (int i = 0; i < g_lTITabs.Count; i++)
                 {
+                    //If creting test and on last tab
                     if (state == TestState.CreatingTest &&
                         g_lTITabs.Count > 1 &&
                         i == g_lTITabs.Count - 1) break;
-                    (g_lTITabs[i].Content as Grid).Width = window1.ActualWidth;
+
+                    (g_lTITabs[i].Content as Grid).Width = tabControl.Width;
                     (g_lTITabs[i].Content as Grid).Height = tabControl.Height - 40;
                     (g_lTITabs[i].Content as Grid).Margin = new Thickness(0, -5, 0, 0);
-                    UIElementCollection children = (g_lTITabs[i].Content as Grid).Children;
+
                     double nImgWidth = 0.0d;
                     if (i != 0 &&
-                        g_lICImages[i-1].picBox.Image != null)
+                        g_lICImages[i - 1].picBox.Image != null)
                     {
-                        nImgWidth = g_lICImages[i-1].picBox.Width;
-                        g_lICImages[i-1].wfh.Margin = new Thickness(tabControl.Width - nImgWidth - 15, 9, 0, 0);
+                        nImgWidth = g_lICImages[i - 1].picBox.Width;
+                        g_lICImages[i - 1].wfh.Margin = new Thickness(tabControl.Width - nImgWidth - 15, 9, 0, 0);
                     }
+
+                    UIElementCollection children = (g_lTITabs[i].Content as Grid).Children;
                     for (int j = 0; j < children.Count; j++)
                     {
-
                         string sID = AutomationProperties.GetAutomationId(children[j]);
                         double dValue2 = 0;
                         double dValue = 0;
+                        #region ifFirstTab
                         if (i == 0)
                         {
                             if (sID == "button_create")
@@ -476,6 +496,8 @@ namespace Secret_Project_WPF
                                 (children[j] as Button).Margin = new Thickness(tabControl.Width / 2 + 20,
                                                                                tabControl.Height / 2 - (children[j] as Button).Height, 0, 0);
                         }
+                        #endregion
+                        #region ifCreatingTest
                         else if (state == TestState.CreatingTest)
                         {
                             if (sID == "textbox_question")
@@ -560,8 +582,24 @@ namespace Secret_Project_WPF
                                                                                dValue2, 0, 0);
                             }
                         }
-                        else if (state == TestState.DoingTest)
+                        #endregion
+                        #region ifDoingTestOrDoingNothing
+                        else
                         {
+                            if (sID == "label_timeLeft")
+                            {
+                                dValue = tabControl.Width - 175;
+                                if (dValue < 0)
+                                {
+                                    dValue = 0;
+                                }
+                                dValue2 = tabControl.Height - 70;
+                                if (dValue2 < 0)
+                                {
+                                    dValue2 = 0;
+                                }
+                                (children[j] as Label).Margin = new Thickness(dValue, dValue2, 0, 0);
+                            }
                             if (sID == "scrollviewer_question")
                             {
                                 dValue = tabControl.Width - 30 - nImgWidth;
@@ -581,6 +619,7 @@ namespace Secret_Project_WPF
                                     new Thickness(tabControl.Width - 100, tabControl.Height - 70, 0, 0);
                             }
                         }
+                        #endregion
                     }
                 }
             }
