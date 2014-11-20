@@ -14,7 +14,7 @@ namespace Secret_Project_WPF
 {
     public partial class MainWindow : Window
     {
-        void DoAddQuestion(ref TabControl tc, QuestionClass QCQuestion, int nQuestionNumber, bool bAddReadyButton = false)
+        private void DoAddQuestion(ref TabControl tc, QuestionClass QCQuestion, int nQuestionNumber, bool bAddReadyButton = false)
         {
             Grid gr = new Grid();
 
@@ -44,7 +44,7 @@ namespace Secret_Project_WPF
             tblQuestion.Width = 50;
             sv.Height = 50;
             sv.Margin = new Thickness(10, 10, 0, 0);
-            tblQuestion.Text = QCQuestion.GetQuestion();
+            tblQuestion.Text = QCQuestion.Question;
             tblQuestion.TextWrapping = TextWrapping.Wrap;
             gr.Children.Add(sv);
 
@@ -54,22 +54,24 @@ namespace Secret_Project_WPF
                 MessageBox.Show("DoAddQuestion() Error: RadioButton list not empty!");
                 return;
             }
-            for (int i = 0; i < Math.Min(QCQuestion.AnswersCount(), 4); i++)
+            for (int i = 0; i < Math.Min(QCQuestion.Answers.Count, 4); i++)
             {
                 g_l2rbAnswers[nQuestionNumber].Add(new RadioButton());
-                //ScrollViewer svv = new ScrollViewer();
-                //svv.Height = 40;
-                //svv.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
-                //svv.Content = g_l2rbAnswers[nQuestionNumber][i];
-                AutomationProperties.SetAutomationId(g_l2rbAnswers[nQuestionNumber][i], "radiobutton_answer");
-                g_l2rbAnswers[nQuestionNumber][i].Content = QCQuestion.GetAnswer(i);
-                g_l2rbAnswers[nQuestionNumber][i].HorizontalAlignment = HorizontalAlignment.Left;
-                g_l2rbAnswers[nQuestionNumber][i].VerticalAlignment = VerticalAlignment.Top;
-                g_l2rbAnswers[nQuestionNumber][i].Height = 20;
-                g_l2rbAnswers[nQuestionNumber][i].Width = 420;
-                g_l2rbAnswers[nQuestionNumber][i].Margin = new Thickness(10, 70 + i * 25, 0, 0);
-                //gr.Children.Add(g_l2rbAnswers[nQuestionNumber][i]);
-                gr.Children.Add(g_l2rbAnswers[nQuestionNumber][i]);
+                g_l2rbAnswers[nQuestionNumber][i].Content = QCQuestion.Answers[i].Value;
+                g_l2rbAnswers[nQuestionNumber][i].Checked += rbAnswer_Checked;
+                ScrollViewer svv = new ScrollViewer();
+                svv.Height = 40;
+                svv.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                svv.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+                svv.Focusable = false;
+                svv.Content = g_l2rbAnswers[nQuestionNumber][i];
+                AutomationProperties.SetAutomationId(svv, "scrollview_answer");
+                svv.HorizontalAlignment = HorizontalAlignment.Left;
+                svv.VerticalAlignment = VerticalAlignment.Top;
+                svv.Height = 23;
+                svv.Width = 420;
+                svv.Margin = new Thickness(10, 70 + i * 25, 0, 0);
+                gr.Children.Add(svv);
             }
 
             g_lLblTimeLeft.Add(new Label());
@@ -78,7 +80,7 @@ namespace Secret_Project_WPF
             label.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             label.VerticalAlignment = System.Windows.VerticalAlignment.Top;
             
-            label.Content = QuestionClass.time.ToString();
+            label.Content = QuestionClass.Time.ToString();
             label.FontSize = 15;
 
             gr.Children.Add(label);
@@ -86,14 +88,13 @@ namespace Secret_Project_WPF
             g_lICImages[nQuestionNumber].Show();
             TabItem ti = new TabItem();
             ti.Content = gr;
-            //tc.Items.Add(ti);
             g_lTITabs.Add(ti);
             ti.GotFocus += DoTabItem_GotFocus;
             ti.Header = String.Format("Въпрос {0}", (tc.Items.Count - 1 < 1) ? 1 : (tc.Items.Count - 1));
 
             ImageClass currentImage = g_lICImages[nQuestionNumber];
             currentImage.picBox.MouseDown += ImageClass.picBox_MouseDown;
-            currentImage.picBox.MouseUp += /*picBox_MouseUp*/
+            currentImage.picBox.MouseUp +=
                 (object mouseUpSender, System.Windows.Forms.MouseEventArgs mouseUpE) =>
                 {
                     ImageClass.pictureOpenMethods += ResizeAndAdjust;
@@ -106,21 +107,38 @@ namespace Secret_Project_WPF
                 };
         }
 
-        void DoButtonReady_Click(object sender, RoutedEventArgs e)
+        private void rbAnswer_Checked(object sender, RoutedEventArgs e)
+        {
+                for (int j = 0; j < g_l2rbAnswers[currentQuestionNum].Count; j++)
+                {
+                    if(g_l2rbAnswers[currentQuestionNum][j].IsChecked == true &&
+                        !Object.ReferenceEquals(g_l2rbAnswers[currentQuestionNum][j], sender))
+                    {
+                        g_l2rbAnswers[currentQuestionNum][j].IsChecked = false;
+                    }
+                }
+        }
+
+        private void DoTabItem_GotFocus(object sender, RoutedEventArgs e)
+        {
+            currentQuestionNum = tabControl.SelectedIndex - 1;
+        }
+
+        private void DoButtonReady_Click(object sender, RoutedEventArgs e)
         {
             Ready();
         }
 
-        void Ready()
+        private void Ready()
         {
-            QuestionClass.StopTimer();
+            QuestionClass.ResetTimer();
 
             int score = 0, totalScore = 0, nNumberOfRightAnswers = 0;
             for (int i = 0; i < g_lQCQuestions.Count; i++)
             {
                 bool bIsRightAnswerChecked = g_lQCQuestions[i].IsRightAnswerChecked(g_l2rbAnswers[i]);
-                score += Convert.ToInt32(bIsRightAnswerChecked) * g_lQCQuestions[i].nPoints;
-                totalScore += g_lQCQuestions[i].nPoints;
+                score += Convert.ToInt32(bIsRightAnswerChecked) * g_lQCQuestions[i].Points;
+                totalScore += g_lQCQuestions[i].Points;
                 nNumberOfRightAnswers += Convert.ToInt32(bIsRightAnswerChecked);
             }
 
@@ -163,10 +181,10 @@ namespace Secret_Project_WPF
             }
 
             state = TestState.DoingNothing;
-            
+            ResizeAndAdjust();
         }
 
-        void TimeOutLabelManage()
+        private void TimeOutLabelManage()
         {
             for (int i = 1; i < g_lTITabs.Count; i++)
             {
@@ -183,17 +201,29 @@ namespace Secret_Project_WPF
             }
         }
 
-        void TimerElapsedLabelManage()
+        private void TimerElapsedLabelManage()
         {
             for (int i = 0; i < g_lLblTimeLeft.Count; i++)
 			{
-                g_lLblTimeLeft[i].Content = QuestionClass.time.ToString();
+                g_lLblTimeLeft[i].Content = QuestionClass.Time.ToString();
 			}
         }
 
-        void DoTabItem_GotFocus(object sender, RoutedEventArgs e)
+        private void HideTimerLabels()
         {
-            g_nCurrQuestion = tabControl.SelectedIndex - 1;
+            for (int i = 1; i < g_lTITabs.Count; i++)
+            {
+                var children = (g_lTITabs[i].Content as Grid).Children;
+                for (int j = 0; j < children.Count; j++)
+                {
+                    string sID = AutomationProperties.GetAutomationId(children[j]);
+                    if (sID == "label_timeLeft")
+                    {
+                        (children[j] as Label).Visibility = System.Windows.Visibility.Hidden;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

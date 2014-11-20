@@ -22,7 +22,12 @@ namespace Secret_Project_WPF
         /// <returns></returns>
         public static string SubstringCharToChar(this string str, char chStart, char chEnd, int nStartAt = 0, bool bWithStart = false, bool bWithEnd = false)
         {
-            return str.Substring(str.IndexOf(chStart, nStartAt) + Convert.ToInt32(!bWithStart), str.IndexOf(chEnd, nStartAt) - str.IndexOf(chStart, nStartAt) - Convert.ToInt32(!bWithStart) + Convert.ToInt32(bWithEnd));
+            int indexOfFirstChar = str.IndexOf(chStart, nStartAt) + Convert.ToInt32(!bWithStart);
+            int length = str.IndexOf(chEnd, nStartAt) -
+                         str.IndexOf(chStart, nStartAt) -
+                         Convert.ToInt32(!bWithStart) +
+                         Convert.ToInt32(bWithEnd);
+            return str.Substring(indexOfFirstChar, length);
         }
 
         /// <summary>
@@ -36,7 +41,12 @@ namespace Secret_Project_WPF
         /// <returns></returns>
         public static string SubstringCharToChar(this string str, char chEnd, int nStartAt = 0, bool bWithStart = false, bool bWithEnd = false)
         {
-            return str.Substring(nStartAt + Convert.ToInt32(!bWithStart), str.IndexOf(chEnd, nStartAt) - nStartAt - Convert.ToInt32(!bWithStart) + Convert.ToInt32(bWithEnd));
+            int indexOfFirstChar = nStartAt + Convert.ToInt32(!bWithStart);
+            int length = str.IndexOf(chEnd, nStartAt) -
+                         nStartAt -
+                         Convert.ToInt32(!bWithStart) +
+                         Convert.ToInt32(bWithEnd);
+            return str.Substring(indexOfFirstChar, length);
         }
 
         /// <summary>
@@ -52,7 +62,6 @@ namespace Secret_Project_WPF
                 for (int i = 0; i < nQuestionNum - list.Count + 1; i++)
                 {
                     list.Add(new QuestionClass());
-                    if (!list[list.Count - 1].InitializeAnswers()) MessageBox.Show("Initialization of answers failed!");
                 }
             }
         }
@@ -65,8 +74,8 @@ namespace Secret_Project_WPF
         {
             for (int i = 0; i < list.Count; i++)
             {
-                for (int j = 0; j < list[i].AnswersCount(); j++)
-                    if (list[i].IsAnswerEmpty(j)) list[i].NullifyAnswer(j);
+                for (int j = 0; j < list[i].Answers.Count; j++)
+                    if (list[i].Answers[j].IsEmpty) list[i].NullifyAnswer(j);
                 if (list[i].IsEmpty()) list[i] = null;
             }
         }
