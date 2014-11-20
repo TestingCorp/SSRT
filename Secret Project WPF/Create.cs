@@ -86,7 +86,7 @@ namespace Secret_Project_WPF
             g_l2rbAnswers.Add(new List<RadioButton>());
             for (int i = 0; i < Math.Min(asAnswers.Count(), 4); i++)
             {
-                g_lQCQuestions[currentQuestionNum].AddAnswer("");
+                g_lQCQuestions[g_lQCQuestions.Count-1].AddAnswer("");
                 ltbAnswers.Add(new TextBox());
                 int nLastIndex = ltbAnswers.Count - 1;
 
@@ -133,7 +133,11 @@ namespace Secret_Project_WPF
                     timer.Height = 25;
                     timer.HorizontalAlignment = HorizontalAlignment.Left;
                     timer.VerticalAlignment = VerticalAlignment.Top;
-                    timer.Text = "[време (мин:сек)]";
+
+                    string sTimerText = "[време (мин:сек)]";
+                    if (i != 0 && g_lTITabs.Count != 2) sTimerText = (GetObjectById("textbox_timer", 1) as TextBox).Text as String;
+                    timer.Text = sTimerText;
+
                     timer.GotFocus += CreateTextBox_GotFocus;
                     timer.LostFocus += CreateTextBox_LostFocus;
                     gr.Children.Add(timer);
@@ -481,20 +485,35 @@ namespace Secret_Project_WPF
             }
             else if (sID == "textbox_timer")
             {
-                Regex r = new Regex("\\d\\d\\:\\d\\d");
-                Match m = r.Match(sContent);
-                if (sContent.Length == 5 && m.Success && !sContent.Equals("00:00"))
+                //Regex r = new Regex("\\d\\d\\:\\d\\d");
+                //Match m = r.Match(sContent);
+                //if (sContent.Length == 5 && m.Success && !sContent.Equals("00:00"))
+                int a;
+                if (sContent.Contains(':') &&
+                    Int32.TryParse(sContent.SubstringCharToChar(':', 0, true), out a) &&
+                    Int32.TryParse(sContent.Substring(sContent.IndexOf(':')+1), out a))
                 {
-                    int minutes = Int32.Parse(sContent.SubstringCharToChar(':', 0, true));
-                    int seconds = Int32.Parse(sContent.Substring(sContent.IndexOf(':') + 1));
-
+                    string sMinutes = sContent.SubstringCharToChar(':', 0, true);
+                    int minutes = Int32.Parse(sMinutes);
+                    string sSeconds = sContent.Substring(sContent.IndexOf(':') + 1);
+                    int seconds = Int32.Parse(sSeconds);
+                    
                     QuestionClass.Time = new TimeSpan(0, minutes, seconds);
+                    (sender as TextBox).Text = String.Format("{0:00}:{1:00}",
+                                               QuestionClass.Time.Hours*60+
+                                               QuestionClass.Time.Minutes,
+                                               QuestionClass.Time.Seconds);
                 }
                 else
                 {
+                    QuestionClass.Time = TimeSpan.Zero;
                     (sender as TextBox).Text = "[време (мин:сек)]";
                 }
-
+                for (int i = 1; i < g_lTITabs.Count-1; i++)
+                {
+                    TextBox textBox = GetObjectById("textbox_timer", i) as TextBox;
+                    textBox.Text = (sender as TextBox).Text;
+                }
             }
         }
     }
