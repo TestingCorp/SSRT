@@ -26,10 +26,14 @@
         <SolidColorBrush x:Key="TextBoxForegroundBrush" Color="#000000"/>
         <SolidColorBrush x:Key="TextBoxBorderBrush" Color="#FFFF99"/>
 
+        <SolidColorBrush x:Key="TextBoxBackroundBrush_whenDisabled" Color="#A4CDB7"/>
+        <SolidColorBrush x:Key="TextBoxForegroundBrush_whenDisabled" Color="#000000"/>
+        <SolidColorBrush x:Key="TextBoxBorderBrush_whenDisabled" Color="#A4CDB7"/>
+
         <CornerRadius x:Key="ThumbBorderRadius" TopLeft="2.5" TopRight="2.5" BottomRight="2.5" BottomLeft="2.5"/>
         <CornerRadius x:Key="TabBorderRadius" TopLeft="7" TopRight="7" BottomRight="0" BottomLeft="0"/>
         <CornerRadius x:Key="TextBoxBorderRadius" TopLeft="5" TopRight="5" BottomRight="5" BottomLeft="5"/>
-        
+
         <!-- Thumb Style -->
         <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
 
@@ -48,7 +52,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <!-- Horizontal Scrollbar Template -->
         <ControlTemplate x:Key="HorizontalScrollBarTemplate" TargetType="{x:Type ScrollBar}">
             <Grid Background="{StaticResource ScrollBackroundBrush}">
@@ -72,7 +76,7 @@
                 </Border>
             </Grid>
         </ControlTemplate>
-       
+
         <!-- ScrollBar Style -->
         <Style x:Key="{x:Type ScrollBar}" TargetType="ScrollBar">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -198,7 +202,7 @@
                                     Panel.ZIndex="4"
                                     Grid.Row="0">
                                 <ScrollViewer HorizontalScrollBarVisibility="Visible" 
-                                              VerticalScrollBarVisibility="Hidden"
+                                              VerticalScrollBarVisibility="Disabled"
                                               Height="28"
                                               Style="{StaticResource ScrollViewerStyle}">
                                     <TabPanel x:Name="HeaderPanel"
@@ -236,13 +240,23 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type TextBoxBase}">
-                        <Border CornerRadius="{StaticResource TextBoxBorderRadius}"
+                        <Border Name="Border" CornerRadius="{StaticResource TextBoxBorderRadius}"
                                 BorderThickness="1"
                                 Background="{StaticResource TextBoxBackroundBrush}"
                                 BorderBrush="{StaticResource TextBoxBorderBrush}">
                             <ScrollViewer Margin="0"
                                           x:Name="PART_ContentHost"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Border" Property="Background"
+                                        Value="{StaticResource TextBoxBackroundBrush_whenDisabled}"/>
+                                <Setter Property="Foreground"
+                                        Value="{StaticResource TextBoxForegroundBrush_whenDisabled}"/>
+                                <Setter TargetName="Border" Property="BorderBrush"
+                                        Value="{StaticResource TextBoxBorderBrush_whenDisabled}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

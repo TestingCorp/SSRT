@@ -16,163 +16,26 @@ namespace Secret_Project_WPF
         /// <summary>
         /// The question
         /// </summary>
-        public string sQuestion { internal set; get; }
+        public string Question { set; get; }
 
         /// <summary>
         /// The points given if the right answer is selected.
         /// </summary>
-        public int nPoints { internal set; get; }
+        public int Points { set; get; }
 
         /// <summary>
         /// A private list of AnswerClass objects to store all the answers.
         /// </summary>
-        private List<AnswerClass> lACAnswers;
+        public List<AnswerClass> Answers { get; private set; }
 
         /// <summary>
         /// An initialization constructor
         /// </summary>
         public QuestionClass()
         {
-            sQuestion = null;
-            lACAnswers = null;
-            nPoints = 0;
-        }
-
-        /// <summary>
-        /// Sets the question equal to the given string
-        /// </summary>
-        /// <param name="question"></param>
-        public void SetQuestion(string question)
-        {
-            sQuestion = question;
-        }
-
-        /// <summary>
-        /// Gets the question
-        /// </summary>
-        /// <param name="question"></param>
-        public string GetQuestion()
-        {
-            return sQuestion;
-        }
-
-        /// <summary>
-        /// Sets the points to the given int
-        /// </summary>
-        /// <param name="points"></param>
-        public void SetPoints(int points)
-        {
-            nPoints = points;
-        }
-
-        public static TimeSpan time { get; set; }
-        public static System.Timers.Timer timer = new System.Timers.Timer(1000);
-
-        public static void RunTimer()
-        {
-            timer.Start();
-        }
-
-        public static void StopTimer()
-        {
-            timer.Stop();
-        }
-
-
-        //Methods to execute when the time is over
-        /* Usage:
-         * onTimeOutExecute += Method;
-         * 
-         * for example:
-         * onTimeOutExecute += ResizeAndAdjust;
-         */
-        public delegate void OnTimeOutExecute();
-        public static OnTimeOutExecute onTimeOutExecute = null;
-
-        public static void timer_Elapsed(List<Label> listOfLabels,
-                                  System.Windows.Threading.Dispatcher dispatcher,
-                                  object sender,
-                                  System.Timers.ElapsedEventArgs e)
-        {
-            time = time.Subtract(new TimeSpan(0, 0, 1));
-            dispatcher.Invoke(new Action(() =>
-            {
-                foreach (var lab in listOfLabels)
-                {
-                    lab.Content = time.ToString();
-                }
-            if(time <= TimeSpan.Zero)
-            {
-                StopTimer();
-                if(onTimeOutExecute != null) onTimeOutExecute();
-                onTimeOutExecute = null;
-                foreach (var label in listOfLabels)
-                {
-                    label.Foreground = System.Windows.Media.Brushes.Red;
-                }
-                return;
-            }
-            }));
-        }
-
-
-        /// <summary>
-        /// Gets the number of answers currently stored in the list of answers.
-        /// </summary>
-        /// <returns></returns>
-        public int AnswersCount()
-        {
-            return lACAnswers.Count;
-        }
-
-        /// <summary>
-        /// Gets the selected answer as string.
-        /// </summary>
-        /// <param name="answerNumber">the number of the answer</param>
-        /// <returns></returns>
-        public string GetAnswer(int answerNumber)
-        {
-            return lACAnswers[answerNumber].sAnswer;
-        }
-
-        /// <summary>
-        /// Sets the selected answer.
-        /// </summary>
-        /// <param name="answerNumber">the answer number</param>
-        /// <param name="answer">the answer as string</param>
-        public void SetAnswer(int answerNumber, string answer)
-        {
-            lACAnswers[answerNumber].sAnswer = answer;
-        }
-
-        /// <summary>
-        /// Checks if the selected answer is the right answer.
-        /// </summary>
-        /// <param name="answerNumber">the answer number</param>
-        /// <returns></returns>
-        public bool IsRightAnswer(int answerNumber)
-        {
-            return lACAnswers[answerNumber].bIsRightAnswer;
-        }
-
-        /// <summary>
-        /// Sets the selected answer's right answer property
-        /// </summary>
-        /// <param name="answerNumber">the answer number</param>
-        /// <param name="rightAnswer">a boolean representing whether the answer is the right answer</param>
-        public void SetRightAnswer(int answerNumber, bool rightAnswer)
-        {
-            lACAnswers[answerNumber].bIsRightAnswer = rightAnswer;
-        }
-
-        /// <summary>
-        /// Checks if the selected answer is empty.
-        /// </summary>
-        /// <param name="answerNumber">the answer number</param>
-        /// <returns></returns>
-        public bool IsAnswerEmpty(int answerNumber)
-        {
-            return lACAnswers[answerNumber].IsEmpty();
+            Question = null;
+            Answers = null;
+            Points = 0;
         }
 
         /// <summary>
@@ -181,41 +44,21 @@ namespace Secret_Project_WPF
         /// <param name="answerNumber">the answer number</param>
         public void NullifyAnswer(int answerNumber)
         {
-            lACAnswers[answerNumber] = null;
-        }
-
-        /// <summary>
-        /// Checks if the selected answer is null.
-        /// </summary>
-        /// <param name="answerNumber">the answer number</param>
-        /// <returns></returns>
-        public bool isAnswerNull(int answerNumber)
-        {
-            return (lACAnswers[answerNumber] == null);
-        }
-
-        /// <summary>
-        /// Adds 4 answers to the null list of answer objects.
-        /// </summary>
-        /// <returns></returns>
-        public bool InitializeAnswers()
-        {
-            if (lACAnswers == null)
-            {
-                lACAnswers = new List<AnswerClass>();
-                for (int i = 0; i < 4; i++) lACAnswers.Add(new AnswerClass());
-                return true;
-            }
-            //TODO: // else throw new exception
-            else return false;
+            Answers[answerNumber] = null;
         }
 
         /// <summary>
         /// Adds an answer to the list of answer objects.
         /// </summary>
-        public void AddAnswer()
+        public void AddAnswer(string value, bool isRightAnswer = false)
         {
-            lACAnswers.Add(new AnswerClass());
+            if (Answers != null)
+                Answers.Add(new AnswerClass(value, isRightAnswer));
+            else
+            {
+                Answers = new List<AnswerClass>();
+                Answers.Add(new AnswerClass(value, isRightAnswer));
+            }
         }
 
         /// <summary>
@@ -226,13 +69,13 @@ namespace Secret_Project_WPF
         {
             try
             {
-                for (int nRightAnswerNum = 0; nRightAnswerNum < lACAnswers.Count(); nRightAnswerNum++)
-                    if (lACAnswers[nRightAnswerNum].bIsRightAnswer == true) return nRightAnswerNum;
+                for (int nRightAnswerNum = 0; nRightAnswerNum < Answers.Count; nRightAnswerNum++)
+                    if (Answers[nRightAnswerNum].IsRightAnswer == true) return nRightAnswerNum;
                 throw new Exception("No right answer!");
             }
             catch (Exception e)
             {
-                MessageBox.Show(String.Format("GetRightAnswerIndex() trew an exception: {0}", e.Message));
+                MessageBox.Show(String.Format("GetRightAnswerIndex() trew an exception: {0}", e.Message), "Грешка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }
@@ -246,13 +89,13 @@ namespace Secret_Project_WPF
         public bool IsRightAnswerChecked(List<RadioButton> lrbAnswers)
         {
             int? nCheckedIndex = lrbAnswers.GetCheckedIndex();
-            if (nCheckedIndex == null)
+            if (nCheckedIndex != null)
             {
-                return false;
+                return (this.Answers[(int)nCheckedIndex].IsRightAnswer == true);
             }
             else
             {
-                return (this.lACAnswers[(int)nCheckedIndex].bIsRightAnswer == true);
+                return false;
             }
         }
 
@@ -263,9 +106,9 @@ namespace Secret_Project_WPF
         /// <returns>true if question is empty, false if not</returns>
         public bool IsEmpty()
         {
-            if (!String.IsNullOrEmpty(sQuestion)) return false;
-            for (int i = 0; i < lACAnswers.Count; i++)
-                if (lACAnswers[i] != null && !lACAnswers[i].IsEmpty()) return false;
+            if (!String.IsNullOrEmpty(Question)) return false;
+            for (int i = 0; i < Answers.Count; i++)
+                if (Answers[i] != null && !Answers[i].IsEmpty) return false;
             return true;
         }
 
@@ -275,17 +118,79 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="lrbAnswers">a list of RadioButtons (for the right answer checked)</param>
         /// <returns>The corresponding error code.</returns>
-        public ISE_ErrorCode IsSomethingWrong(List<RadioButton> lrbAnswers)
+        public TestErrorCode IsSomethingWrong(List<RadioButton> lrbAnswers)
         {
-            if (String.IsNullOrEmpty(sQuestion)) return ISE_ErrorCode.NoQuestion;
-            for (int i = 0; i < this.lACAnswers.Count; i++)
+            if (String.IsNullOrEmpty(Question)) return TestErrorCode.NoQuestion;
+            for (int i = 0; i < this.Answers.Count; i++)
             {
-                if (!this.lACAnswers[i].IsEmpty()) break;
-                if (i == this.lACAnswers.Count - 1) return ISE_ErrorCode.NoAnswers;
+                if (!this.Answers[i].IsEmpty) break;
+                if (i == this.Answers.Count - 1) return TestErrorCode.NoAnswers;
             }
-            if (lrbAnswers.GetCheckedIndex() == null) return ISE_ErrorCode.NoRightAnswer;
-            if (this.nPoints <= 0) return ISE_ErrorCode.NoPoints;
-            return ISE_ErrorCode.AllFine;
+            if (this.Points <= 0) return TestErrorCode.NoPoints;
+            if (lrbAnswers.GetCheckedIndex() != null)
+            {
+                return TestErrorCode.AllFine;
+            }
+            else
+            {
+                return TestErrorCode.NoRightAnswer;
+            }
+        }
+
+        public static TimeSpan Time { get; set; }
+        private static System.Timers.Timer timer = new System.Timers.Timer(1000);
+
+        public static void SetTimerElapsedEventHandler(System.Timers.ElapsedEventHandler handler)
+        {
+            timer.Elapsed += handler;
+        }
+
+        public static void RunTimer()
+        {
+            timer.Start();
+        }
+
+        private static void StopTimer()
+        {
+            timer.Stop();
+        }
+
+        public static void ResetTimer()
+        {
+            StopTimer();
+            NulliftDelegates();
+        }
+
+        private static void NulliftDelegates()
+        {
+            onTimeOutExecute = null;
+            onTimerElapsedExecute = null;
+        }
+
+        //Methods to execute when the time is over
+        public delegate void OnTimeOutExecute();
+        public static OnTimeOutExecute onTimeOutExecute = null;
+
+        //Methods to execute when the time interval has elapsed
+        public delegate void OnTimerElapsedExecute();
+        public static OnTimerElapsedExecute onTimerElapsedExecute = null;
+
+        public static void timer_Elapsed(System.Windows.Threading.Dispatcher dispatcher,
+                                         object sender,
+                                         System.Timers.ElapsedEventArgs e)
+        {
+            Time = Time.Subtract(TimeSpan.FromSeconds(1));
+            dispatcher.Invoke(new Action(() =>
+            {
+                if (onTimerElapsedExecute != null) onTimerElapsedExecute();
+                if (Time <= TimeSpan.Zero)
+                {
+                    StopTimer();
+                    if (onTimeOutExecute != null) onTimeOutExecute();
+                    NulliftDelegates();
+                    return;
+                }
+            }));
         }
     }
 }

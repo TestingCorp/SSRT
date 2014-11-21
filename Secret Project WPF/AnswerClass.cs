@@ -10,33 +10,41 @@
         /// The class used to store the answers. It includes a boolean to know if the answers is the right one,
         /// the answer itself, an initialization constructor and a method to check if the answers is invalid.
         /// </summary>
-        class AnswerClass
+        public class AnswerClass
         {
             /// <summary>
             /// The answer
             /// </summary>
-            public string sAnswer { set; get; }
+            public string Value { set; get; }
 
             /// <summary>
             /// A boolean representing whether the answer is the righ one
             /// </summary>
-            public bool bIsRightAnswer { set; get; }
+            public bool IsRightAnswer { set; get; }
 
             /// <summary>
             /// Sets sAnswer to an empty string and the boolean for the right answer to false
             /// </summary>
             public AnswerClass()
             {
-                bIsRightAnswer = false; sAnswer = String.Empty;
+                IsRightAnswer = false; Value = String.Empty;
+            }
+
+            public AnswerClass(string answer, bool isRightAnswer = false)
+            {
+                Value = answer;
+                IsRightAnswer = isRightAnswer;
             }
 
             /// <summary>
             /// Checks if the answer given is null or an empty string
             /// </summary>
             /// <returns></returns>
-            public bool IsEmpty()
-            { 
-                return String.IsNullOrEmpty(sAnswer);
+            public bool IsEmpty {
+                get
+                {
+                    return String.IsNullOrEmpty(Value);
+                }
             }
         }
     }

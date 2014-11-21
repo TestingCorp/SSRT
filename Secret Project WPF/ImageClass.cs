@@ -15,10 +15,6 @@ namespace Secret_Project_WPF
     /// </summary>
     public class ImageClass
     {
-        public delegate void MethodsToExecute();
-        public static MethodsToExecute pictureOpenMethods = null;
-        public static MethodsToExecute pictureCloseMethods = null;
-
         /// <summary>
         /// A Control to store the Windows.Forms PictureBox object
         /// </summary>
@@ -30,24 +26,11 @@ namespace Secret_Project_WPF
         public System.Windows.Forms.PictureBox picBox { get; set; }
 
         /// <summary>
-        /// The window that opens when you click on an image
-        /// </summary>
-        private static Window imageWindow;
-
-        /// <summary>
-        /// Used with the handles for MouseDown and MouseUp
-        /// </summary>
-        private static DateTime downTime;
-
-        /// <summary>
         /// A constructor which initializes the objects
         /// and sets alignment, size options and some other properties
         /// </summary>
         public ImageClass()
         {
-            imageWindow = new Window();
-            imageWindow.ResizeMode = System.Windows.ResizeMode.NoResize;
-
             wfh = new WindowsFormsHost();
             wfh.HorizontalAlignment = HorizontalAlignment.Left;
             wfh.VerticalAlignment = VerticalAlignment.Top;
@@ -58,6 +41,12 @@ namespace Secret_Project_WPF
             SetSize(0, 0);
             wfh.Visibility = Visibility.Hidden;
             picBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+        }
+
+        public static void InitImageWindow()
+        {
+            imageWindow = new Window();
+            imageWindow.ResizeMode = System.Windows.ResizeMode.NoResize;
         }
 
         /// <summary>
@@ -89,6 +78,20 @@ namespace Secret_Project_WPF
         {
             wfh.Visibility = Visibility.Hidden;
         }
+
+        public delegate void MethodsToExecute();
+        public static MethodsToExecute pictureOpenMethods = null;
+        public static MethodsToExecute pictureCloseMethods = null;
+
+        /// <summary>
+        /// The window that opens when you click on an image
+        /// </summary>
+        private static Window imageWindow;
+
+        /// <summary>
+        /// Used with the handles for MouseDown and MouseUp
+        /// </summary>
+        private static DateTime downTime;
 
         /// <summary>
         /// Sets the handle for the imageWindow's Closing event
@@ -165,8 +168,8 @@ namespace Secret_Project_WPF
                       BitmapSizeOptions.FromEmptyOptions());
             imageWindow.Icon = wpfBitmap;
 
-            //Show the image window
             imageWindow.Closing += imageWindow_Closing;
+            //Show the image window
             imageWindow.Show();
             if(pictureOpenMethods != null) pictureOpenMethods();
             pictureOpenMethods = null;

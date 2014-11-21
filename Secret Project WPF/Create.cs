@@ -18,30 +18,24 @@ namespace Secret_Project_WPF
 {
     public partial class MainWindow : Window
     {
-        public static List<Label> listOfLabels = new List<Label>();
-
         /// <summary>
         /// While creating a test when the last tab AddQuestion is selected this method creates and adds a new question to the TabControl
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CreateTabItemAdd_GotFocus(object sender, RoutedEventArgs e)
+        private void CreateTabItemAdd_GotFocus(object sender, RoutedEventArgs e)
         {
-            //AddQuestion(ref tabControl, ManageStringLines("How longdlkasmdv;alsmd;lcakmds ;lakmdsc lakmds;clkasdlcmaslkm asdc?How lpo nmklmlmlkkd v;alsmd;lcakmds ;lakmdsc lakmds;clkasdlcmaslkm asdc?"), new string[] { "No", "Idea", "What", "To do" });
             g_lQCQuestions.AddQuestionIfNotExist();
             TabItem ti = new TabItem();
             ti.Content = CreateAddQuestion(new string[] { "[отговор 1]", "[отговор 2]", "[отговор 3]", "[отговор 4]" });
             ti.Header = String.Format("Въпрос {0}", (g_lTITabs.Count - 1 <= 1) ? 1 : (g_lTITabs.Count - 1));
             ti.GotFocus += CreateTabItem_GotFocus;
-            (ti.Content as Grid).Width = window1.ActualWidth;
+            (ti.Content as Grid).Width = tabControl.Width;
             g_lTITabs.Add(ti);
             g_lTITabs.Remove(sender as TabItem);
             g_lTITabs.Add(sender as TabItem);
             ResizeAndAdjust();
-            //tabControl.Items.Remove(sender);
-            //tabControl.Items.Add(sender);
             tabControl.SelectedIndex = tabControl.Items.Count - 2;
-
         }
 
         /// <summary>
@@ -49,12 +43,10 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="tc"></param>
         /// <param name="asAnswers"></param>
-        Grid CreateAddQuestion(string[] asAnswers)
+        private Grid CreateAddQuestion(string[] asAnswers)
         {
             Grid gr = new Grid();
             gr.Width = tabControl.Width;
-            //gr.Background = Brushes.Aqua;
-            //gr.Height = tabControl.Height-40;
             gr.Margin = new Thickness(0, -5, 0, 0);
 
             Button btReady = new Button();
@@ -63,7 +55,6 @@ namespace Secret_Project_WPF
             btReady.VerticalAlignment = VerticalAlignment.Top;
             btReady.Width = 87;
             btReady.Height = 25;
-            //btReady.Margin = new Thickness(tabControl.Width - 115, tabControl.Height - 70, 0, 0);
             btReady.Content = "Готов съм";
             btReady.Click += CreateButtonReady_Click;
             gr.Children.Add(btReady);
@@ -74,7 +65,6 @@ namespace Secret_Project_WPF
             btRemove.VerticalAlignment = VerticalAlignment.Top;
             btRemove.Width = 87;
             btRemove.Height = 25;
-            //btRemove.Margin = new Thickness(tabControl.Width - 115 - 87 - 10, tabControl.Height - 70, 0, 0);
             btRemove.Content = "Изтриване";
             btRemove.Click += CreateButtonRemove_Click;
             gr.Children.Add(btRemove);
@@ -85,7 +75,6 @@ namespace Secret_Project_WPF
             tbQuestion.VerticalAlignment = VerticalAlignment.Top;
             tbQuestion.AcceptsReturn = true;
             tbQuestion.TextWrapping = TextWrapping.Wrap;
-            //tbQuestion.Width = tabControl.Width-30-150;
             tbQuestion.Height = 50;
             tbQuestion.Margin = new Thickness(10, 8, 0, 0);
             tbQuestion.Text = "[въпрос]";
@@ -97,6 +86,7 @@ namespace Secret_Project_WPF
             g_l2rbAnswers.Add(new List<RadioButton>());
             for (int i = 0; i < Math.Min(asAnswers.Count(), 4); i++)
             {
+                g_lQCQuestions[g_lQCQuestions.Count-1].AddAnswer("");
                 ltbAnswers.Add(new TextBox());
                 int nLastIndex = ltbAnswers.Count - 1;
 
@@ -106,7 +96,6 @@ namespace Secret_Project_WPF
                 ltbAnswers[nLastIndex].HorizontalAlignment = HorizontalAlignment.Left;
                 ltbAnswers[nLastIndex].VerticalAlignment = VerticalAlignment.Top;
                 ltbAnswers[nLastIndex].Height = 20;
-                //ltbAnswers[nLastIndex].Width = tabControl.Width - 30 -150-13;
                 ltbAnswers[nLastIndex].Margin = new Thickness(13 + 10, 70 + i * 25, 0, 0);
                 ltbAnswers[nLastIndex].GotFocus += CreateTextBox_GotFocus;
                 ltbAnswers[nLastIndex].LostFocus +=
@@ -144,7 +133,11 @@ namespace Secret_Project_WPF
                     timer.Height = 25;
                     timer.HorizontalAlignment = HorizontalAlignment.Left;
                     timer.VerticalAlignment = VerticalAlignment.Top;
-                    timer.Text = "[време (мин:сек)]";
+
+                    string sTimerText = "[време (мин:сек)]";
+                    if (i != 0 && g_lTITabs.Count != 2) sTimerText = (GetObjectById("textbox_timer", 1) as TextBox).Text as String;
+                    timer.Text = sTimerText;
+
                     timer.GotFocus += CreateTextBox_GotFocus;
                     timer.LostFocus += CreateTextBox_LostFocus;
                     gr.Children.Add(timer);
@@ -162,33 +155,29 @@ namespace Secret_Project_WPF
             gr.Children.Add(browse);
 
             g_lICImages.Add(new ImageClass());
-            //WindowsFormsHost wfh = new WindowsFormsHost();
-
-            /*wfh.Width = tabControl.ActualWidth - 350;
-            wfh.Height = tabControl.ActualHeight - 95;*/
-
-            //wfh.Margin = new Thickness(tabControl.Width - wfh.Width - 15, 9, 0, 0);
-            //wfh.Child = g_lICImages[g_lICImages.Count - 1].picBox;
             gr.Children.Add(g_lICImages[g_lICImages.Count - 1].wfh);
             return gr;
         }
 
-        void CreateTabItem_GotFocus(object sender, RoutedEventArgs e)
+        private void CreateTabItem_GotFocus(object sender, RoutedEventArgs e)
         {
-            g_nCurrQuestion = tabControl.SelectedIndex - 1;
+            currentQuestionNum = tabControl.SelectedIndex - 1;
         }
 
-        void CreateButtonBrowse_Click(object sender, RoutedEventArgs e)
+        private void CreateButtonBrowse_Click(object sender, RoutedEventArgs e)
         {
             var browseBut = sender as Button;
             if (browseBut.Content.Equals("-Изображение"))
             {
-                if (MessageBox.Show(String.Format("В момента имате добавено изображение! Сигурни ли сте, че желаете да го изтриете?"), "Внимание!", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (MessageBox.Show(String.Format("В момента имате добавено изображение! " +
+                                                  "Сигурни ли сте, че желаете да го изтриете?"),
+                                                  "Внимание!",
+                                                  MessageBoxButton.YesNo,
+                                                  MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    //g_lICImages[g_nCurrQuestion].img.Source = null;
-                    g_lICImages[g_nCurrQuestion].picBox.Image.Dispose();
-                    g_lICImages[g_nCurrQuestion].picBox.Image = null;
-                    g_lICImages[g_nCurrQuestion].SetSize(0, 0);
+                    g_lICImages[currentQuestionNum].picBox.Image.Dispose();
+                    g_lICImages[currentQuestionNum].picBox.Image = null;
+                    g_lICImages[currentQuestionNum].SetSize(0, 0);
                     ResizeAndAdjust();
                     browseBut.Content = "+Изображение";
                 }
@@ -210,13 +199,13 @@ namespace Secret_Project_WPF
             int controlsHeight = (int)(tabControl.ActualHeight - 95);
             int controlsWidth = (int)(imageRatio * controlsHeight);
 
-            ImageClass currentImage = g_lICImages[g_nCurrQuestion];
+            ImageClass currentImage = g_lICImages[currentQuestionNum];
             currentImage.picBox.Image = img;
             currentImage.SetSize(controlsWidth, controlsHeight);
             currentImage.Show();
 
             currentImage.picBox.MouseDown += ImageClass.picBox_MouseDown;
-            currentImage.picBox.MouseUp += /*picBox_MouseUp*/
+            currentImage.picBox.MouseUp +=
                 (object mouseUpSender, System.Windows.Forms.MouseEventArgs mouseUpE) =>
                 {
                     ImageClass.pictureOpenMethods += ResizeAndAdjust;
@@ -237,22 +226,35 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CreateButtonRemove_Click(object sender, RoutedEventArgs e)
+        private void CreateButtonRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Сигурни ли сте, че искате да изтриете този въпрос?", "Внимание!",
-                MessageBoxButton.YesNo) == MessageBoxResult.No) return;
-            g_lQCQuestions.RemoveAt(g_nCurrQuestion);
-            g_l2rbAnswers.RemoveAt(g_nCurrQuestion);
+            if (MessageBox.Show("Сигурни ли сте, че искате да изтриете този въпрос?",
+                                "Внимание!",
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Warning) == MessageBoxResult.No)
+            {
+                return;
+            }
+            g_lQCQuestions.RemoveAt(currentQuestionNum);
+            g_l2rbAnswers.RemoveAt(currentQuestionNum);
+
             tabControl.SelectedIndex = 0;
-            g_lTITabs.RemoveAt(g_nCurrQuestion + 1);
-            g_lICImages.RemoveAt(g_nCurrQuestion);
+            g_lTITabs.RemoveAt(currentQuestionNum + 1);
+            g_lICImages.RemoveAt(currentQuestionNum);
             if (g_lTITabs.Count == 2)
+            {
                 tabControl.SelectedIndex = g_lTITabs.Count - 1;
-            else if (g_nCurrQuestion > 0)
-                g_nCurrQuestion--;
-            tabControl.SelectedIndex = g_nCurrQuestion + 1;
-            for (int i = g_nCurrQuestion + 1; i < g_lTITabs.Count - 1; i++)
+            }
+            else if (currentQuestionNum > 0)
+            {
+                currentQuestionNum--;
+            }
+            tabControl.SelectedIndex = currentQuestionNum + 1;
+
+            for (int i = tabControl.SelectedIndex; i < g_lTITabs.Count - 1; i++)
+            {
                 g_lTITabs[i].Header = String.Format("Въпрос {0}", i);
+            }
         }
 
         /// <summary>
@@ -261,79 +263,111 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CreateButtonReady_Click(object sender, RoutedEventArgs e)
+        private void CreateButtonReady_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < g_lQCQuestions.Count; i++)
+            try
             {
-                switch (g_lQCQuestions[i].IsSomethingWrong(g_l2rbAnswers[i]))
+                for (int i = 0; i < g_lQCQuestions.Count; i++)
                 {
-                    case ISE_ErrorCode.NoAnswers:
-                        MessageBox.Show(String.Format("Не сте въвели нито един отговор при въпрос {0}!", i + 1));
-                        return;
-                    case ISE_ErrorCode.NoQuestion:
-                        MessageBox.Show(String.Format("Не сте въвели въпрос при въпрос {0}!", i + 1));
-                        return;
-                    case ISE_ErrorCode.NoRightAnswer:
-                        MessageBox.Show(String.Format("Не сте избрали верен отговор при въпрос {0}!", i + 1));
-                        return;
-                    case ISE_ErrorCode.NoPoints:
-                        MessageBox.Show(String.Format("Не сте въвели брой точки за верен отговор на въпрос {0}!", i + 1));
-                        return;
-                    case ISE_ErrorCode.AllFine:
-                        break;
-                }
-            }
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = "MGTest files (.mgt)|*.mgt";
-            saveFileDialog1.FilterIndex = 1;
-            bool? nbClickedOK = saveFileDialog1.ShowDialog();
-            if (nbClickedOK != true) return;
-            QuestionClass.StopTimer();
-            List<string> lsOutput;
-            Encode(out lsOutput, g_lQCQuestions);
-            List<string> enc = new List<string>();
-            for (int i = 0; i < lsOutput.Count; i++)
-            {
-                string sOutput = lsOutput[i];
-                enc.Add(Encrypt(ref sOutput, "I like spagetti!"));
-            }
-            using (Stream fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write))
-            {
-                using (BinaryWriter bw = new BinaryWriter(fs))
-                {
-                    bw.Write(g_lQCQuestions.Count);
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        long bytesCount = -1;
-                        for (int i = 0; i < enc.Count; i++)
-                        {
-                            bw.Write(enc[i]);
-                            if (g_lICImages[i].picBox.Image != null)
-                            {
-                                g_lICImages[i].picBox.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                                bytesCount = ms.Length;
-                                ms.Position = 0;
-                            }
-                            bw.Write(bytesCount);
-                            if (bytesCount != -1) { ms.CopyTo(fs); ms.Position = 0; }
-                        }
-                        bw.Write(QuestionClass.time.Minutes);
-                        bw.Write(QuestionClass.time.Seconds);
+                    TestErrorCode errorCode = g_lQCQuestions[i].IsSomethingWrong(g_l2rbAnswers[i]);
+                    if (errorCode == TestErrorCode.AllFine) continue;
 
+                    string sError = String.Empty;
+                    switch (errorCode)
+                    {
+                        case TestErrorCode.NoAnswers:
+                            sError = "Не сте въвели нито един отговор при";
+                            break;
+                        case TestErrorCode.NoQuestion:
+                            sError = "Не сте въвели въпрос при";
+                            break;
+                        case TestErrorCode.NoRightAnswer:
+                            sError = "Не сте избрали верен отговор при";
+                            break;
+                        case TestErrorCode.NoPoints:
+                            sError = "Не сте въвели брой точки за верен отговор на";
+                            break;
+                    }
+                    MessageBox.Show(String.Format(sError + " въпрос {0}!", i + 1), "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (QuestionClass.Time == TimeSpan.Zero)
+                {
+                    if (MessageBox.Show("Не сте избрали време за решаване на теста! Сигурни ли " +
+                                        "сте, че не искате да задавате време?",
+                                        "Внимание",
+                                        MessageBoxButton.YesNo,
+                                        MessageBoxImage.Question) == MessageBoxResult.No)
+                    {
+                        return;
                     }
                 }
 
-                /*using (StreamWriter stream = new StreamWriter(saveFileDialog1.FileName))
-                    stream.WriteLine(enc);*/
-                while (g_lTITabs.Count > 1)
-                    g_lTITabs.RemoveAt(g_lTITabs.Count - 1);
-                g_lQCQuestions = null;
-                g_l2rbAnswers = null;
-                //btCreate.IsEnabled = true;
-                state = TestState.DoingNothing;
-                /*StreamReader streamR = new StreamReader("output.mgt");
-                string dec = Decrypt(streamR.ReadLine(), "I like spagetti!");
-                streamR.Close();*/
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                saveFileDialog1.Filter = "MGTest files (.mgt)|*.mgt";
+                saveFileDialog1.FilterIndex = 1;
+
+                bool? nbClickedOK = saveFileDialog1.ShowDialog();
+                if (nbClickedOK != true) return;
+
+                List<string> lsOutput;
+                if (!Encode(out lsOutput, g_lQCQuestions))
+                {
+                    throw new OperationFailedException("Кодирането на данните се провали.");
+                }
+
+                List<string> enc = new List<string>();
+                for (int i = 0; i < lsOutput.Count; i++)
+                {
+                    string sOutput = lsOutput[i];
+                    enc.Add(Encrypt(ref sOutput, "I like spagetti!"));
+                }
+
+                using (Stream fileStream = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write))
+                {
+                    using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
+                    {
+                        binaryWriter.Write(g_lQCQuestions.Count);
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            long bytesCount = -1;
+                            for (int i = 0; i < enc.Count; i++)
+                            {
+                                binaryWriter.Write(enc[i]);
+                                if (g_lICImages[i].picBox.Image != null)
+                                {
+                                    System.Drawing.Bitmap resizedImage;
+                                    System.Drawing.Size newSize = new System.Drawing.Size();
+                                    newSize.Height = 500;
+                                    double imageRatio = (double)(g_lICImages[i].picBox.Image.Width) /
+                                                                 g_lICImages[i].picBox.Image.Height;
+                                    newSize.Width = (int)(imageRatio * newSize.Height);
+                                    resizedImage = new System.Drawing.Bitmap(g_lICImages[i].picBox.Image, newSize);
+                                    resizedImage.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                                    bytesCount = ms.Length;
+                                    ms.Position = 0;
+                                }
+                                binaryWriter.Write(bytesCount);
+                                if (bytesCount != -1) { ms.CopyTo(fileStream); ms.Position = 0; }
+                            }
+                            binaryWriter.Write(QuestionClass.Time.Minutes);
+                            binaryWriter.Write(QuestionClass.Time.Seconds);
+                        }
+                    }
+
+                    state = TestState.DoingNothing;
+                    ResetTest();
+                }
+            }
+            catch (OperationFailedException exc)
+            {
+                MessageBox.Show("Възникна грешка при записването на теста. Грешката показва следното съобщение:{0}",
+                                exc.Message);
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Възникна непозната грешка при записването на теста. " +
+                    "Грешката показва следното съобщение:{0}", exc.Message);
             }
         }
 
@@ -342,7 +376,7 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CreateRadioButtonAnswer_CheckedChanged(object sender, RoutedEventArgs e)
+        private void CreateRadioButtonAnswer_CheckedChanged(object sender, RoutedEventArgs e)
         {
             int nAnswerNum = -1, nQuestionNum = -1;
             for (nQuestionNum = 0; nQuestionNum < g_l2rbAnswers.Count; nQuestionNum++)
@@ -351,9 +385,23 @@ namespace Secret_Project_WPF
                         goto next;
         next:
             if ((sender as RadioButton).IsChecked == true)
-                g_lQCQuestions[nQuestionNum].SetRightAnswer(nAnswerNum, true);
+            {
+                string correspondingTextboxId = String.Format("textbox_answer_" + nAnswerNum);
+                TextBox correspondingTextbox = GetObjectById(correspondingTextboxId, currentQuestionNum + 1) as TextBox;
+                if (correspondingTextbox.Text == String.Empty ||
+                    correspondingTextbox.Text.Length > 8 &&
+                    correspondingTextbox.Text.Substring(0, 9) == "[отговор ")
+                {
+                    MessageBox.Show("Моля въведете отговор преди да сте го отбелязали като верен!",
+                                    "Внимание",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Information);
+                    (sender as RadioButton).IsChecked = false;
+                }
+                g_lQCQuestions[nQuestionNum].Answers[nAnswerNum].IsRightAnswer = true;
+            }
             else
-                g_lQCQuestions[nQuestionNum].SetRightAnswer(nAnswerNum, false);
+                g_lQCQuestions[nQuestionNum].Answers[nAnswerNum].IsRightAnswer = false;
         }
 
         /// <summary>
@@ -361,7 +409,7 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CreateTextBox_GotFocus(object sender, RoutedEventArgs e)
+        private void CreateTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             string sText = (sender as TextBox).Text;
             if (sText == "[въпрос]" ||
@@ -378,13 +426,13 @@ namespace Secret_Project_WPF
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CreateTextBox_LostFocus(object sender, RoutedEventArgs e)
+        private void CreateTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             //Get ID of text box (format is "textbox_answer_{number}")
             string sID = AutomationProperties.GetAutomationId(sender as TextBox);
 
             //Set the question number from the global variable
-            int nQuestionNum = g_nCurrQuestion;
+            int nQuestionNum = currentQuestionNum;
 
             string sContent = (sender as TextBox).Text;
             //Get the answer number from the ID and assign it to nAnswerNum
@@ -396,13 +444,16 @@ namespace Secret_Project_WPF
                 if (sContent == String.Empty)
                 {
                     //Set the answer in the global list of questions to be empty as well
-                    g_lQCQuestions[nQuestionNum].SetAnswer(nAnswerNum, String.Empty);
+                    g_lQCQuestions[nQuestionNum].Answers[nAnswerNum].Value = String.Empty;
                     //and set the textbox'es text equal to the appropriate default value
                     (sender as TextBox).Text = String.Format("[отговор {0}]", nAnswerNum + 1);
+
+                    RadioButton correspondingRadioButton = g_l2rbAnswers[nQuestionNum][nAnswerNum];
+                    correspondingRadioButton.IsChecked = false;
                 }
                 else
                     //If the textbox is not empty set the answer to its content
-                    g_lQCQuestions[nQuestionNum].SetAnswer(nAnswerNum, sContent);
+                    g_lQCQuestions[nQuestionNum].Answers[nAnswerNum].Value = sContent;
             }
             else if (sID == "textbox_question")
             {
@@ -410,14 +461,14 @@ namespace Secret_Project_WPF
                 if (sContent == String.Empty)
                 {
                     //Set the question in the global list of questions to be empty as well
-                    g_lQCQuestions[g_nCurrQuestion].SetQuestion(String.Empty);
+                    g_lQCQuestions[currentQuestionNum].Question = String.Empty;
                     //and set the textbox'es text the appropriate default value
                     (sender as TextBox).Text = String.Format("[въпрос]");
                 }
                 else
                 {
                     //If the textbox is not empty set the question equal to its content
-                    g_lQCQuestions[g_nCurrQuestion].SetQuestion(sContent);
+                    g_lQCQuestions[currentQuestionNum].Question = sContent;
                 }
             }
             else if (sID == "textbox_points")
@@ -430,26 +481,38 @@ namespace Secret_Project_WPF
                     (sender as TextBox).Text = "[брой точки]";
                 }
                 //Set the points equal to the texbox'es content
-                g_lQCQuestions[g_nCurrQuestion].SetPoints(nRes);
+                g_lQCQuestions[currentQuestionNum].Points = nRes;
             }
             else if (sID == "textbox_timer")
             {
-                Regex r = new Regex("\\d\\d\\:\\d\\d");
-                Match m = r.Match(sContent);
-                if (m.Success)
+                //Regex r = new Regex("\\d\\d\\:\\d\\d");
+                //Match m = r.Match(sContent);
+                //if (sContent.Length == 5 && m.Success && !sContent.Equals("00:00"))
+                int a;
+                if (sContent.Contains(':') &&
+                    Int32.TryParse(sContent.SubstringCharToChar(':', 0, true), out a) &&
+                    Int32.TryParse(sContent.Substring(sContent.IndexOf(':')+1), out a))
                 {
-                    int minutes = Int32.Parse(sContent.SubstringCharToChar(':', 0, true));
-                    int seconds = Int32.Parse(sContent.Substring(sContent.IndexOf(':') + 1));
-
-                    QuestionClass.time = new TimeSpan(0, minutes, seconds);
+                    string sMinutes = sContent.SubstringCharToChar(':', 0, true);
+                    int minutes = Int32.Parse(sMinutes);
+                    string sSeconds = sContent.Substring(sContent.IndexOf(':') + 1);
+                    int seconds = Int32.Parse(sSeconds);
+                    
+                    QuestionClass.Time = new TimeSpan(0, minutes, seconds);
+                    (sender as TextBox).Text = String.Format("{0:00}:{1:00}",
+                                               QuestionClass.Time.Hours*60+
+                                               QuestionClass.Time.Minutes,
+                                               QuestionClass.Time.Seconds);
                 }
                 else
                 {
-                    //if it fails or the number is not positive set the textbox'es content the appropriate default value
+                    QuestionClass.Time = TimeSpan.Zero;
                     (sender as TextBox).Text = "[време (мин:сек)]";
-
-                    //Set the points equal to the texbox'es content
-                    // g_lQCQuestions[g_nCurrQuestion].SetPoints(nRes);
+                }
+                for (int i = 1; i < g_lTITabs.Count-1; i++)
+                {
+                    TextBox textBox = GetObjectById("textbox_timer", i) as TextBox;
+                    textBox.Text = (sender as TextBox).Text;
                 }
             }
         }
