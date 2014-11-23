@@ -481,8 +481,8 @@ namespace Secret_Project_WPF
         {
             try
             {
-                if (window1.ActualHeight < 400) window1.Height = 400;
-                if (window1.ActualWidth < 600) window1.Width = 600;
+                /*if (window1.ActualHeight < 400) window1.Height = 400;
+                if (window1.ActualWidth < 600) window1.Width = 600;*/
                 tabControl.Height = window1.ActualHeight - 45;
                 tabControl.Width = window1.ActualWidth - 30;
                 for (int i = 0; i < g_lTITabs.Count; i++)
