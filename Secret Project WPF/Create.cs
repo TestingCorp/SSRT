@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Forms.Integration;
 using System.Text.RegularExpressions;
+using System.Windows.Markup;
 
 namespace Secret_Project_WPF
 {
@@ -71,11 +72,14 @@ namespace Secret_Project_WPF
 
             TextBox tbQuestion = new TextBox();
             AutomationProperties.SetAutomationId(tbQuestion, "textbox_question");
+            //tbQuestion.Template = (ControlTemplate)XamlReader.Parse(Properties.Resources.CreateTextBoxQuestionTemplate);
+            tbQuestion.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            tbQuestion.SelectionStart = tbQuestion.Text.Length;
             tbQuestion.HorizontalAlignment = HorizontalAlignment.Left;
             tbQuestion.VerticalAlignment = VerticalAlignment.Top;
             tbQuestion.AcceptsReturn = true;
             tbQuestion.TextWrapping = TextWrapping.Wrap;
-            tbQuestion.Height = 50;
+            tbQuestion.Height = 70;
             tbQuestion.Margin = new Thickness(10, 8, 0, 0);
             tbQuestion.Text = "[въпрос]";
             tbQuestion.GotFocus += CreateTextBox_GotFocus;
@@ -92,11 +96,14 @@ namespace Secret_Project_WPF
 
                 string sID = String.Format("textbox_answer_{0}", i);
                 AutomationProperties.SetAutomationId(ltbAnswers[nLastIndex], sID);
+                //ltbAnswers[nLastIndex].Template = (ControlTemplate)XamlReader.Parse(Properties.Resources.CreateTextBoxAnswerTemplate);
                 ltbAnswers[nLastIndex].Text = asAnswers[i];
                 ltbAnswers[nLastIndex].HorizontalAlignment = HorizontalAlignment.Left;
+                ltbAnswers[nLastIndex].HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+                //ltbAnswers[nLastIndex].Style
                 ltbAnswers[nLastIndex].VerticalAlignment = VerticalAlignment.Top;
-                ltbAnswers[nLastIndex].Height = 20;
-                ltbAnswers[nLastIndex].Margin = new Thickness(13 + 10, 70 + i * 25, 0, 0);
+                ltbAnswers[nLastIndex].Height = 25;
+                ltbAnswers[nLastIndex].Margin = new Thickness(13 + 10, 90 + i * 30, 0, 0);
                 ltbAnswers[nLastIndex].GotFocus += CreateTextBox_GotFocus;
                 ltbAnswers[nLastIndex].LostFocus +=
                     CreateTextBox_LostFocus;
@@ -106,7 +113,7 @@ namespace Secret_Project_WPF
                 g_l2rbAnswers[nLastIndex].Add(new RadioButton());
                 g_l2rbAnswers[nLastIndex][i].Width = 13;
                 g_l2rbAnswers[nLastIndex][i].Height = 13;
-                g_l2rbAnswers[nLastIndex][i].Margin = new Thickness(10, 73 + i * 25, 0, 0);
+                g_l2rbAnswers[nLastIndex][i].Margin = new Thickness(10, 90 + i * 30 + 5, 0, 0);
                 g_l2rbAnswers[nLastIndex][i].HorizontalAlignment = HorizontalAlignment.Left;
                 g_l2rbAnswers[nLastIndex][i].VerticalAlignment = VerticalAlignment.Top;
                 g_l2rbAnswers[nLastIndex][i].Checked += CreateRadioButtonAnswer_CheckedChanged;
@@ -275,11 +282,17 @@ namespace Secret_Project_WPF
                     string sError = String.Empty;
                     switch (errorCode)
                     {
+                        case TestErrorCode.NoQuestion:
+                            sError = "Не сте въвели въпрос при";
+                            break;
                         case TestErrorCode.NoAnswers:
                             sError = "Не сте въвели нито един отговор при";
                             break;
-                        case TestErrorCode.NoQuestion:
-                            sError = "Не сте въвели въпрос при";
+                        case TestErrorCode.TooFewAnswers:
+                            sError = "Въвели сте прекалено малко отговори при ";
+                            break;
+                        case TestErrorCode.DuplicateAnswers:
+                            sError = "Въвели сте два еднакви отговора при ";
                             break;
                         case TestErrorCode.NoRightAnswer:
                             sError = "Не сте избрали верен отговор при";

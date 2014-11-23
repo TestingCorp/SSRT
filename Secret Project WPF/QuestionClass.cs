@@ -121,12 +121,36 @@ namespace Secret_Project_WPF
         public TestErrorCode IsSomethingWrong(List<RadioButton> lrbAnswers)
         {
             if (String.IsNullOrEmpty(Question)) return TestErrorCode.NoQuestion;
+            int numberOfAnswers = 0;
             for (int i = 0; i < this.Answers.Count; i++)
             {
-                if (!this.Answers[i].IsEmpty) break;
-                if (i == this.Answers.Count - 1) return TestErrorCode.NoAnswers;
+                if (!this.Answers[i].IsEmpty)
+                {
+                    numberOfAnswers++;
+                }
             }
-            if (this.Points <= 0) return TestErrorCode.NoPoints;
+            if (numberOfAnswers == 0)
+            {
+                return TestErrorCode.NoAnswers;
+            }
+            else if (numberOfAnswers == 1)
+            {
+                return TestErrorCode.TooFewAnswers;
+            }
+            for (int i = 0; i < this.Answers.Count; i++)
+            {
+                for (int j = i + 1; j < this.Answers.Count; j++)
+                {
+                    if (!this.Answers[i].IsEmpty &&
+                       !this.Answers[j].IsEmpty &&
+                        this.Answers[i].Value == this.Answers[j].Value)
+                        return TestErrorCode.DuplicateAnswers;
+                }
+            }
+            if (this.Points <= 0)
+            {
+                return TestErrorCode.NoPoints;
+            }
             if (lrbAnswers.GetCheckedIndex() != null)
             {
                 return TestErrorCode.AllFine;
