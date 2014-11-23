@@ -282,11 +282,17 @@ namespace Secret_Project_WPF
                     string sError = String.Empty;
                     switch (errorCode)
                     {
+                        case TestErrorCode.NoQuestion:
+                            sError = "Не сте въвели въпрос при";
+                            break;
                         case TestErrorCode.NoAnswers:
                             sError = "Не сте въвели нито един отговор при";
                             break;
-                        case TestErrorCode.NoQuestion:
-                            sError = "Не сте въвели въпрос при";
+                        case TestErrorCode.TooFewAnswers:
+                            sError = "Въвели сте прекалено малко отговори при ";
+                            break;
+                        case TestErrorCode.DuplicateAnswers:
+                            sError = "Въвели сте два еднакви отговора при ";
                             break;
                         case TestErrorCode.NoRightAnswer:
                             sError = "Не сте избрали верен отговор при";

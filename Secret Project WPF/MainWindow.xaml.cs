@@ -29,6 +29,8 @@ namespace Secret_Project_WPF
     {
         NoQuestion,
         NoAnswers,
+        TooFewAnswers,
+        DuplicateAnswers,
         NoRightAnswer,
         NoPoints,
         AllFine
