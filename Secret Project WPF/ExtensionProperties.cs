@@ -41,6 +41,38 @@ namespace Secret_Project_WPF
             return (Brush)element.GetValue(ScrollBarThumbBrush);
         }
 
+        public static readonly DependencyProperty VScrollBarCornerRadius =
+                    DependencyProperty.RegisterAttached("VScrollBarCornerRadius",
+                    typeof(CornerRadius),
+                    typeof(ExtensionProperties),
+                    new FrameworkPropertyMetadata(default(CornerRadius)));
+
+        public static void SetVScrollBarCornerRadius(UIElement element, CornerRadius value)
+        {
+            element.SetValue(VScrollBarCornerRadius, value);
+        }
+
+        public static CornerRadius GetVScrollBarCornerRadius(UIElement element)
+        {
+            return (CornerRadius)element.GetValue(VScrollBarCornerRadius);
+        }
+
+        public static readonly DependencyProperty HScrollBarCornerRadius =
+                    DependencyProperty.RegisterAttached("HScrollBarCornerRadius",
+                    typeof(CornerRadius),
+                    typeof(ExtensionProperties),
+                    new FrameworkPropertyMetadata(default(CornerRadius)));
+
+        public static void SetHScrollBarCornerRadius(UIElement element, CornerRadius value)
+        {
+            element.SetValue(HScrollBarCornerRadius, value);
+        }
+
+        public static CornerRadius GetHScrollBarCornerRadius(UIElement element)
+        {
+            return (CornerRadius)element.GetValue(HScrollBarCornerRadius);
+        }
+
         public static readonly DependencyProperty ScrollBarCornerRadius =
                     DependencyProperty.RegisterAttached("ScrollBarCornerRadius",
                     typeof(CornerRadius),
@@ -54,7 +86,7 @@ namespace Secret_Project_WPF
 
         public static CornerRadius GetScrollBarCornerRadius(UIElement element)
         {
-            return (CornerRadius)element.GetValue(ScrollBarBackgroundBrush);
+            return (CornerRadius)element.GetValue(ScrollBarCornerRadius);
         }
     }
 }

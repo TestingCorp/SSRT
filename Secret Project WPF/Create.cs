@@ -26,16 +26,18 @@ namespace Secret_Project_WPF
         /// <param name="e"></param>
         private void CreateTabItemAdd_GotFocus(object sender, RoutedEventArgs e)
         {
+            tabControl.SelectedIndex = 0;
+
             g_lQCQuestions.AddQuestionIfNotExist();
             TabItem ti = new TabItem();
             ti.Content = CreateAddQuestion(new string[] { "[отговор 1]", "[отговор 2]", "[отговор 3]", "[отговор 4]" });
             ti.Header = String.Format("Въпрос {0}", (g_lTITabs.Count - 1 <= 1) ? 1 : (g_lTITabs.Count - 1));
-            ti.GotFocus += CreateTabItem_GotFocus;
             (ti.Content as Grid).Width = tabControl.Width;
             g_lTITabs.Add(ti);
             g_lTITabs.Remove(sender as TabItem);
             g_lTITabs.Add(sender as TabItem);
             ResizeAndAdjust();
+            
             tabControl.SelectedIndex = tabControl.Items.Count - 2;
         }
 
@@ -166,11 +168,16 @@ namespace Secret_Project_WPF
             return gr;
         }
 
-        private void CreateTabItem_GotFocus(object sender, RoutedEventArgs e)
+        void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            currentQuestionNum = tabControl.SelectedIndex - 1;
+            if (state == TestState.CreatingTest &&
+                tabControl.Items.Count != 2 &&
+                tabControl.SelectedIndex != 0 &&
+                tabControl.SelectedIndex != tabControl.Items.Count - 1)
+            {
+                currentQuestionNum = tabControl.SelectedIndex - 1;
+            }
         }
-
         private void CreateButtonBrowse_Click(object sender, RoutedEventArgs e)
         {
             var browseBut = sender as Button;

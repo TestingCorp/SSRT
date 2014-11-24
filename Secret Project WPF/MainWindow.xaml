@@ -2,14 +2,14 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Secret_Project_WPF"
-        Title="Система за създаване и решаване на тестове"
+        Title="Система за управляване на тестове"
         ResizeMode="NoResize" Width="650" Height="330">
     <Window.Resources>
         <SolidColorBrush x:Key="ScrollThumbBrush" Color="#85A694" />
         <SolidColorBrush x:Key="ScrollBackroundBrush" Color="#A4CDB7"/>
 
-        <SolidColorBrush x:Key="TextBoxScrollThumbBrush" Color="red" />
-        <SolidColorBrush x:Key="TextBoxScrollBackroundBrush" Color="DarkRed"/>
+        <SolidColorBrush x:Key="TextBoxScrollThumbBrush" Color="#85A694" />
+        <SolidColorBrush x:Key="TextBoxScrollBackroundBrush" Color="#A4CDB7"/>
 
         <SolidColorBrush x:Key="TabControlBackroundBrush" Color="#D6FFE9"/>
         <SolidColorBrush x:Key="TabControlBorderBrush" Color="#A4CDB7"/>
@@ -26,9 +26,9 @@
         <SolidColorBrush x:Key="TabForegroundBrush_whenDisabled" Color="White"/>
         <SolidColorBrush x:Key="TabForegroundBrush_whenDisabled_whenActive" Color="#EF2525"/>
 
-        <SolidColorBrush x:Key="TextBoxBackroundBrush" Color="#FFFFDD"/>
+        <SolidColorBrush x:Key="TextBoxBackroundBrush" Color="#EFFFFF"/>
         <SolidColorBrush x:Key="TextBoxForegroundBrush" Color="#000000"/>
-        <SolidColorBrush x:Key="TextBoxBorderBrush" Color="#FFFF99"/>
+        <SolidColorBrush x:Key="TextBoxBorderBrush" Color="#A4CDB7"/>
 
         <SolidColorBrush x:Key="TextBoxBackroundBrush_whenDisabled" Color="#A4CDB7"/>
         <SolidColorBrush x:Key="TextBoxForegroundBrush_whenDisabled" Color="#000000"/>
@@ -37,6 +37,8 @@
         <CornerRadius x:Key="ThumbBorderRadius" TopLeft="2.5" TopRight="2.5" BottomRight="2.5" BottomLeft="2.5"/>
         <CornerRadius x:Key="TabBorderRadius" TopLeft="5.5" TopRight="5.5" BottomRight="0" BottomLeft="0"/>
         <CornerRadius x:Key="TextBoxBorderRadius" TopLeft="5" TopRight="5" BottomRight="5" BottomLeft="5"/>
+        <CornerRadius x:Key="TextBoxHScrollBorderRadius" TopLeft="0" TopRight="0" BottomRight="5" BottomLeft="5"/>
+        <CornerRadius x:Key="TextBoxVScrollBorderRadius" TopLeft="0" TopRight="5" BottomRight="5" BottomLeft="0"/>
 
         <!-- Thumb Style -->
         <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
@@ -48,7 +50,12 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Thumb}">
                         <Border
-                            CornerRadius="{StaticResource ThumbBorderRadius}"
+                            CornerRadius="{Binding RelativeSource=
+                                        {
+                                            RelativeSource FindAncestor,
+                                            AncestorType=ScrollBar
+                                        },
+                                        Path=(local:ExtensionProperties.ScrollBarCornerRadius)}"
                             Margin="1,1,1,1"
                             Background="{Binding
                                         RelativeSource=
@@ -82,7 +89,7 @@
                                 CornerRadius="{Binding RelativeSource=
                                         {
                                             RelativeSource FindAncestor,
-                                            AncestorType=ScrollViewer
+                                            AncestorType=ScrollBar
                                         },
                                         Path=(local:ExtensionProperties.ScrollBarCornerRadius)}" />
                     </ControlTemplate>
@@ -98,12 +105,7 @@
                                             AncestorType=ScrollViewer
                                         },
                                         Path=(local:ExtensionProperties.ScrollBarBackgroundBrush)}"
-                  CornerRadius="{Binding RelativeSource=
-                                        {
-                                            RelativeSource FindAncestor,
-                                            AncestorType=ScrollViewer
-                                        },
-                                        Path=(local:ExtensionProperties.ScrollBarCornerRadius)}">
+                  CornerRadius="{Binding RelativeSource={RelativeSource Self},Path=(local:ExtensionProperties.ScrollBarCornerRadius)}">
                 <Track Name="PART_Track" IsEnabled="{TemplateBinding IsMouseOver}">
                     <Track.DecreaseRepeatButton>
                         <RepeatButton Name="DecreaseRepeat"
@@ -138,31 +140,47 @@
                 <Trigger Property="Orientation" Value="Horizontal">
                     <Setter Property="Width" Value="Auto"/>
                     <Setter Property="Height" Value="9" />
+                    <Setter Property="local:ExtensionProperties.ScrollBarCornerRadius"
+                    Value="{Binding RelativeSource=
+                        {
+                            RelativeSource FindAncestor,
+                            AncestorType=ScrollViewer
+                        },
+                        Path=(local:ExtensionProperties.HScrollBarCornerRadius)}"/>
                 </Trigger>
                 <Trigger Property="Orientation" Value="Vertical">
                     <Setter Property="Width" Value="8"/>
                     <Setter Property="Height" Value="Auto" />
+                    <Setter Property="local:ExtensionProperties.ScrollBarCornerRadius"
+                    Value="{Binding RelativeSource=
+                        {
+                            RelativeSource FindAncestor,
+                            AncestorType=ScrollViewer
+                        },
+                        Path=(local:ExtensionProperties.VScrollBarCornerRadius)}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <!-- ScrollViewer Style -->
-        <Style  x:Key="ScrollViewerStyle" TargetType="ScrollViewer">
+        <Style TargetType="ScrollViewer">
             <Setter Property="OverridesDefaultStyle" Value="False"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="local:ExtensionProperties.ScrollBarBackgroundBrush" Value="{StaticResource ScrollBackroundBrush}"/>
             <Setter Property="local:ExtensionProperties.ScrollBarThumbBrush" Value="{StaticResource ScrollThumbBrush}"/>
+            <Setter Property="local:ExtensionProperties.HScrollBarCornerRadius" Value="{StaticResource TextBoxBorderRadius}"/>
+            <Setter Property="local:ExtensionProperties.VScrollBarCornerRadius" Value="{StaticResource TextBoxBorderRadius}"/>
         </Style>
 
         <!-- ScrollViewer Style for the TextBoxes -->
-        <Style x:Key="ScrollViewerTextBoxStyle" BasedOn="{StaticResource ScrollViewerStyle}" TargetType="ScrollViewer">
+        <Style x:Key="ScrollViewerTextBoxStyle" TargetType="ScrollViewer">
             <Setter Property="local:ExtensionProperties.ScrollBarBackgroundBrush"
                     Value="{StaticResource TextBoxScrollBackroundBrush}"/>
             <Setter Property="local:ExtensionProperties.ScrollBarThumbBrush"
                     Value="{StaticResource TextBoxScrollThumbBrush}"/>
-            <Setter Property="local:ExtensionProperties.ScrollBarCornerRadius"
-                    Value="{StaticResource TextBoxBorderRadius}"/>
+            <Setter Property="local:ExtensionProperties.HScrollBarCornerRadius" Value="{StaticResource TextBoxHScrollBorderRadius}"/>
+            <Setter Property="local:ExtensionProperties.VScrollBarCornerRadius" Value="{StaticResource TextBoxVScrollBorderRadius}"/>
         </Style>
 
         <!-- TabItem Style -->
@@ -233,7 +251,7 @@
                                 <ScrollViewer HorizontalScrollBarVisibility="Visible" 
                                               VerticalScrollBarVisibility="Disabled"
                                               SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"
-                                              Style="{StaticResource ScrollViewerStyle}">
+                                              >
                                     <TabPanel x:Name="HeaderPanel"
                                               KeyboardNavigation.TabIndex="1"
                                               MaxHeight="25px"

@@ -102,6 +102,8 @@ namespace Secret_Project_WPF
             CreateAndAddMainTab();
 
             tabControl.ItemsSource = g_lTITabs;
+            tabControl.SelectionChanged += new SelectionChangedEventHandler(tabControl_SelectionChanged);
+            
 
             window1.SizeChanged += delegate { ResizeAndAdjust(); };
             window1.Closing += window1_Closing;
