@@ -14,9 +14,12 @@ namespace Secret_Project_WPF
 {
     public partial class MainWindow : Window
     {
-        private void DoAddQuestion(ref TabControl tc, QuestionClass QCQuestion, int nQuestionNumber, bool bAddReadyButton = false)
+        private void DoAddQuestion(ref TabControl tc,
+                                   QuestionClass QCQuestion,
+                                   int nQuestionNumber,
+                                   bool bAddReadyButton = false)
         {
-            Grid gr = new Grid();
+            Grid grid = new Grid();
 
             if (bAddReadyButton)
             {
@@ -28,8 +31,8 @@ namespace Secret_Project_WPF
                 btReady.Height = 25;
                 btReady.Content = "Готов съм";
                 btReady.Margin = new Thickness(tabControl.Width - 100, tabControl.Height - 70, 0, 0);
-                btReady.Click += DoButtonReady_Click;
-                gr.Children.Add(btReady);
+                btReady.Click += (object sender, RoutedEventArgs e) => FinishTest();
+                grid.Children.Add(btReady);
             }
 
             ScrollViewer sv = new ScrollViewer();
@@ -46,7 +49,7 @@ namespace Secret_Project_WPF
             sv.Margin = new Thickness(10, 10, 0, 0);
             tblQuestion.Text = QCQuestion.Question;
             tblQuestion.TextWrapping = TextWrapping.Wrap;
-            gr.Children.Add(sv);
+            grid.Children.Add(sv);
 
             //List<RadioButton> lrbAnswers = new List<RadioButton>(4);
             if (g_l2rbAnswers[nQuestionNumber].Count != 0)
@@ -54,42 +57,50 @@ namespace Secret_Project_WPF
                 MessageBox.Show("DoAddQuestion() Error: RadioButton list not empty!");
                 return;
             }
+            List<Label> llblAnswers = new List<Label>();
             for (int i = 0; i < Math.Min(QCQuestion.Answers.Count, 4); i++)
             {
                 g_l2rbAnswers[nQuestionNumber].Add(new RadioButton());
-                g_l2rbAnswers[nQuestionNumber][i].Content = QCQuestion.Answers[i].Value;
-                g_l2rbAnswers[nQuestionNumber][i].Checked += rbAnswer_Checked;
+                g_l2rbAnswers[nQuestionNumber][i].Margin = new Thickness(10, 72 + i * 25, 0, 0);
+                g_l2rbAnswers[nQuestionNumber][i].HorizontalAlignment = HorizontalAlignment.Left;
+                g_l2rbAnswers[nQuestionNumber][i].VerticalAlignment = VerticalAlignment.Top;
+                grid.Children.Add(g_l2rbAnswers[nQuestionNumber][i]);
+
+                llblAnswers.Add(new Label());
+                llblAnswers[i].Content = QCQuestion.Answers[i].Value;
+                llblAnswers[i].VerticalAlignment = VerticalAlignment.Top;
+
                 ScrollViewer svv = new ScrollViewer();
-                svv.Height = 40;
+                string sID = String.Format("scrollview_answer_{0}", i);
+                AutomationProperties.SetAutomationId(svv, sID);
+                svv.Height = 26;
+                svv.Width = 420;
+                svv.Margin = new Thickness(10 + 13, 65 + i * 25, 0, 0);
+                svv.VerticalAlignment = VerticalAlignment.Top;
+                svv.HorizontalAlignment = HorizontalAlignment.Left;
                 svv.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
                 svv.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
                 svv.Focusable = false;
-                svv.Content = g_l2rbAnswers[nQuestionNumber][i];
-                AutomationProperties.SetAutomationId(svv, "scrollview_answer");
-                svv.HorizontalAlignment = HorizontalAlignment.Left;
-                svv.VerticalAlignment = VerticalAlignment.Top;
-                svv.Height = 23;
-                svv.Width = 420;
-                svv.Margin = new Thickness(10, 70 + i * 25, 0, 0);
-                gr.Children.Add(svv);
+                svv.Content = llblAnswers[i];
+                grid.Children.Add(svv);
             }
 
-            g_lLblTimeLeft.Add(new Label());
-            Label label = g_lLblTimeLeft[g_lLblTimeLeft.Count - 1];
+            List<Label> llblTimeLeft = new List<Label>();
+            llblTimeLeft.Add(new Label());
+            Label label = llblTimeLeft[llblTimeLeft.Count - 1];
             AutomationProperties.SetAutomationId(label, "label_timeLeft");
             label.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
             label.VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            
+
             label.Content = QuestionClass.Time.ToString();
             label.FontSize = 15;
 
-            gr.Children.Add(label);
-            gr.Children.Add(g_lICImages[nQuestionNumber].wfh);
+            grid.Children.Add(label);
+            grid.Children.Add(g_lICImages[nQuestionNumber].wfh);
             g_lICImages[nQuestionNumber].Show();
             TabItem ti = new TabItem();
-            ti.Content = gr;
+            ti.Content = grid;
             g_lTITabs.Add(ti);
-            ti.GotFocus += DoTabItem_GotFocus;
             ti.Header = String.Format("Въпрос {0}", (tc.Items.Count - 1 < 1) ? 1 : (tc.Items.Count - 1));
 
             ImageClass currentImage = g_lICImages[nQuestionNumber];
@@ -107,71 +118,77 @@ namespace Secret_Project_WPF
                 };
         }
 
-        private void rbAnswer_Checked(object sender, RoutedEventArgs e)
-        {
-                for (int j = 0; j < g_l2rbAnswers[currentQuestionNum].Count; j++)
-                {
-                    if(g_l2rbAnswers[currentQuestionNum][j].IsChecked == true &&
-                        !Object.ReferenceEquals(g_l2rbAnswers[currentQuestionNum][j], sender))
-                    {
-                        g_l2rbAnswers[currentQuestionNum][j].IsChecked = false;
-                    }
-                }
-        }
-
-        private void DoTabItem_GotFocus(object sender, RoutedEventArgs e)
-        {
-            currentQuestionNum = tabControl.SelectedIndex - 1;
-        }
-
-        private void DoButtonReady_Click(object sender, RoutedEventArgs e)
-        {
-            Ready();
-        }
-
-        private void Ready()
+        /// <summary>
+        /// When the time has ran out or the user has pressed the Ready button
+        /// calculates the score, shows a message and takes care of the color
+        /// of the text.
+        /// </summary>
+        private void FinishTest()
         {
             QuestionClass.ResetTimer();
 
-            int score = 0, totalScore = 0, nNumberOfRightAnswers = 0;
+            // Calculate the scores
+            int score = 0, totalScore = 0, numberOfRightAnswers = 0;
             for (int i = 0; i < g_lQCQuestions.Count; i++)
             {
                 bool bIsRightAnswerChecked = g_lQCQuestions[i].IsRightAnswerChecked(g_l2rbAnswers[i]);
-                score += Convert.ToInt32(bIsRightAnswerChecked) * g_lQCQuestions[i].Points;
+
+                // Add the points for the question to the total score
                 totalScore += g_lQCQuestions[i].Points;
-                nNumberOfRightAnswers += Convert.ToInt32(bIsRightAnswerChecked);
+
+                // If the right answer has been checked, add the points for the question to the score and increase the number of right answers
+                if (bIsRightAnswerChecked)
+                {
+                    score += g_lQCQuestions[i].Points;
+                    numberOfRightAnswers++;
+                }
             }
 
-            if ((g_lTITabs[g_lTITabs.Count - 1].Content as Grid) != null)
+            // Shows a message with an information about the number of right answers and the score
+            string message = String.Format("{0}/{1} верни отговора ({2}/{3} точки)", numberOfRightAnswers, g_lQCQuestions.Count, score.ToString(), totalScore.ToString());
+            MessageBox.Show(message, "Резултат", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Changes the foreground of right answers to green and guessed wrong answers to red
+            for (int i = 0; i < g_lQCQuestions.Count; i++)
             {
-                UIElementCollection children = (g_lTITabs[g_lTITabs.Count - 1].Content as Grid).Children;
-                for (int i = 0; i < children.Count; i++)
+                int? nnChecked = g_l2rbAnswers[i].GetCheckedIndex(),
+                     nnRight = g_lQCQuestions[i].GetRightAnswerIndex();
+
+                if (nnChecked != nnRight && nnChecked != null && nnRight != null) // If user has guessed the answer wrong
                 {
-                    if (children[i] is Button &&
-                        AutomationProperties.GetAutomationId(children[i] as Button) == "button_ready")
+                    string sID = string.Format("scrollview_answer_{0}", (int)nnChecked);
+                    object scrollViewer = (GetObjectById(sID, i + 1));
+                    if (scrollViewer != null) 
                     {
-                        (children[i] as Button).Content = String.Format("{0} точки", score);
-                        (children[i] as Button).IsEnabled = false;
-                        break;
+                        Label label = ((scrollViewer as ScrollViewer).Content as Label);
+                        label.Foreground = Brushes.Red;
+                    }
+                }
+
+                if (nnRight != null)
+                {
+                    string sID = string.Format("scrollview_answer_{0}", (int)nnRight);
+                    object scrollViewer = (GetObjectById(sID, i + 1));
+                    if (scrollViewer != null) 
+                    {
+                        Label label = ((scrollViewer as ScrollViewer).Content as Label);
+                        label.Foreground = Brushes.Green;
                     }
                 }
             }
 
-            MessageBox.Show(String.Format("{0}/{1} верни отговора ({2}/{3} точки)", nNumberOfRightAnswers, g_lQCQuestions.Count, score.ToString(), totalScore.ToString()), "Резултат", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            for (int i = 0; i < g_lQCQuestions.Count; i++)
+            // Set the content of the ready button in the last tab to the score and disable it
+            if ((g_lTITabs[g_lTITabs.Count - 1].Content as Grid) != null) // If the grid of the last tab is not null
             {
-                int? nnChecked = g_l2rbAnswers[i].GetCheckedIndex(), nnRight = g_lQCQuestions[i].GetRightAnswerIndex();
-                if (nnChecked != nnRight && nnChecked != null && nnRight != null)
+                object button = GetObjectById("button_ready", g_lTITabs.Count - 1);
+                if (button != null)
                 {
-                    g_l2rbAnswers[i][(int)nnChecked].Foreground = Brushes.Red;
-                }
-                if (nnRight != null)
-                {
-                    g_l2rbAnswers[i][(int)nnRight].Foreground = Brushes.Green;
+                    (button as Button).Content = String.Format("{0} точки", score);
+                    (button as Button).IsEnabled = false;
                 }
             }
 
+            // Disable all the RadioButtons
             for (int i = 0; i < g_l2rbAnswers.Count; i++)
             {
                 for (int j = 0; j < g_l2rbAnswers[i].Count; j++)
@@ -180,49 +197,43 @@ namespace Secret_Project_WPF
                 }
             }
 
-            state = TestState.DoingNothing;
+            state = TestState.DoingNothing; // Reset the state of the test
             ResizeAndAdjust();
         }
 
+        /// <summary>
+        /// Changes the foreground of all time labels to red
+        /// </summary>
         private void TimeOutLabelManage()
         {
             for (int i = 1; i < g_lTITabs.Count; i++)
             {
-                var children = (g_lTITabs[i].Content as Grid).Children;
-                for (int j = 0; j < children.Count; j++)
-                {
-                    string sID = AutomationProperties.GetAutomationId(children[j]);
-                    if (sID == "label_timeLeft")
-                    {
-                        (children[j] as Label).Foreground = Brushes.Red;
-                        break;
-                    }
-                }
+                object label = GetObjectById("label_timeLeft", i);
+                if (label != null) (label as Label).Foreground = Brushes.Red;
             }
         }
 
+        /// <summary>
+        /// Each second updates the time in each of the time labels
+        /// </summary>
         private void TimerElapsedLabelManage()
         {
-            for (int i = 0; i < g_lLblTimeLeft.Count; i++)
-			{
-                g_lLblTimeLeft[i].Content = QuestionClass.Time.ToString();
-			}
+            for (int i = 1; i < g_lTITabs.Count; i++)
+            {
+                object label = GetObjectById("label_timeLeft", i);
+                if (label != null) (label as Label).Content = QuestionClass.Time.ToString();
+            }
         }
 
+        /// <summary>
+        /// Sets the Visibility property of the time labels to Hidden
+        /// </summary>
         private void HideTimerLabels()
         {
             for (int i = 1; i < g_lTITabs.Count; i++)
             {
-                var children = (g_lTITabs[i].Content as Grid).Children;
-                for (int j = 0; j < children.Count; j++)
-                {
-                    string sID = AutomationProperties.GetAutomationId(children[j]);
-                    if (sID == "label_timeLeft")
-                    {
-                        (children[j] as Label).Visibility = System.Windows.Visibility.Hidden;
-                        break;
-                    }
-                }
+                object label = GetObjectById("label_timeLeft", i);
+                if (label != null) (label as Label).Visibility = System.Windows.Visibility.Hidden;
             }
         }
     }

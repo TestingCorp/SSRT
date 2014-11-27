@@ -52,8 +52,9 @@ namespace Secret_Project_WPF
         /// </summary>
         public void AddAnswer(string value, bool isRightAnswer = false)
         {
-            if (Answers != null)
+            if (Answers != null) // If answers list is not empty just add an answer
                 Answers.Add(new AnswerClass(value, isRightAnswer));
+            // If it is, init it and then add an answer
             else
             {
                 Answers = new List<AnswerClass>();
@@ -69,8 +70,13 @@ namespace Secret_Project_WPF
         {
             try
             {
-                for (int nRightAnswerNum = 0; nRightAnswerNum < Answers.Count; nRightAnswerNum++)
-                    if (Answers[nRightAnswerNum].IsRightAnswer == true) return nRightAnswerNum;
+                for (int nRightAnswerNum = 0; nRightAnswerNum < Answers.Count; nRightAnswerNum++) // For every answer
+                {
+                    if (Answers[nRightAnswerNum].IsRightAnswer == true) // If the answer is the right one
+                    {
+                        return nRightAnswerNum;
+                    }
+                }
                 throw new Exception("No right answer!");
             }
             catch (Exception e)
@@ -88,12 +94,12 @@ namespace Secret_Project_WPF
         /// <returns>true if the right answer is checked</returns>
         public bool IsRightAnswerChecked(List<RadioButton> lrbAnswers)
         {
-            int? nCheckedIndex = lrbAnswers.GetCheckedIndex();
-            if (nCheckedIndex != null)
+            int? nCheckedIndex = lrbAnswers.GetCheckedIndex(); // Get the number of the checked RadioButton
+            if (nCheckedIndex != null) // If there is something checked
             {
-                return (this.Answers[(int)nCheckedIndex].IsRightAnswer == true);
+                return (this.Answers[(int)nCheckedIndex].IsRightAnswer == true); // Return if the checked answer is the right one
             }
-            else
+            else // If nothing is checked yet
             {
                 return false;
             }
@@ -106,9 +112,18 @@ namespace Secret_Project_WPF
         /// <returns>true if question is empty, false if not</returns>
         public bool IsEmpty()
         {
-            if (!String.IsNullOrEmpty(Question)) return false;
-            for (int i = 0; i < Answers.Count; i++)
-                if (Answers[i] != null && !Answers[i].IsEmpty) return false;
+            if (!String.IsNullOrEmpty(Question)) // IF the question is empty
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Answers.Count; i++) // For each answer
+            {
+                if (Answers[i] != null && !Answers[i].IsEmpty) // If answer is not null and not empty
+                {
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -120,15 +135,20 @@ namespace Secret_Project_WPF
         /// <returns>The corresponding error code.</returns>
         public TestErrorCode IsSomethingWrong(List<RadioButton> lrbAnswers)
         {
-            if (String.IsNullOrEmpty(Question)) return TestErrorCode.NoQuestion;
-            int numberOfAnswers = 0;
-            for (int i = 0; i < this.Answers.Count; i++)
+            if (String.IsNullOrEmpty(Question)) // If question is empty
             {
-                if (!this.Answers[i].IsEmpty)
+                return TestErrorCode.NoQuestion;
+            }
+
+            int numberOfAnswers = 0; // Count of the answers
+            for (int i = 0; i < this.Answers.Count; i++) // For every answer
+            {
+                if (!this.Answers[i].IsEmpty) // If it is not null
                 {
-                    numberOfAnswers++;
+                    numberOfAnswers++; // Increase count
                 }
             }
+
             if (numberOfAnswers == 0)
             {
                 return TestErrorCode.NoAnswers;
@@ -137,6 +157,8 @@ namespace Secret_Project_WPF
             {
                 return TestErrorCode.TooFewAnswers;
             }
+
+            // If there are duplicate answers
             for (int i = 0; i < this.Answers.Count; i++)
             {
                 for (int j = i + 1; j < this.Answers.Count; j++)
@@ -147,11 +169,13 @@ namespace Secret_Project_WPF
                         return TestErrorCode.DuplicateAnswers;
                 }
             }
+
             if (this.Points <= 0)
             {
                 return TestErrorCode.NoPoints;
             }
-            if (lrbAnswers.GetCheckedIndex() != null)
+
+            if (lrbAnswers.GetCheckedIndex() != null) // If nothing is wrong and there is an answer checked
             {
                 return TestErrorCode.AllFine;
             }
@@ -161,56 +185,71 @@ namespace Secret_Project_WPF
             }
         }
 
+        /// <summary>
+        /// Represents the time remaining in the test
+        /// </summary>
         public static TimeSpan Time { get; set; }
         private static System.Timers.Timer timer = new System.Timers.Timer(1000);
 
+        /// <summary>
+        /// Sets a handler to be executed every second
+        /// </summary>
+        /// <param name="handler"></param>
         public static void SetTimerElapsedEventHandler(System.Timers.ElapsedEventHandler handler)
         {
             timer.Elapsed += handler;
         }
 
+        //Methods to execute when the time is over
+        public static Action onTimeOutExecute = null;
+
+        //Methods to execute on each elapsed time interval
+        public static Action onTimerElapsedExecute = null;
+
+        /// <summary>
+        /// Run/Start the timer
+        /// </summary>
         public static void RunTimer()
         {
             timer.Start();
         }
 
+        /// <summary>
+        /// Stop the timer
+        /// </summary>
         private static void StopTimer()
         {
             timer.Stop();
         }
 
+        /// <summary>
+        /// Stop the timer and nullify delegates
+        /// </summary>
         public static void ResetTimer()
         {
             StopTimer();
             NulliftDelegates();
         }
 
+        // Sets the delegates to null
         private static void NulliftDelegates()
         {
             onTimeOutExecute = null;
             onTimerElapsedExecute = null;
         }
 
-        //Methods to execute when the time is over
-        public delegate void OnTimeOutExecute();
-        public static OnTimeOutExecute onTimeOutExecute = null;
-
-        //Methods to execute when the time interval has elapsed
-        public delegate void OnTimerElapsedExecute();
-        public static OnTimerElapsedExecute onTimerElapsedExecute = null;
-
         public static void timer_Elapsed(System.Windows.Threading.Dispatcher dispatcher,
                                          object sender,
                                          System.Timers.ElapsedEventArgs e)
         {
-            Time = Time.Subtract(TimeSpan.FromSeconds(1));
+            Time = Time.Subtract(TimeSpan.FromSeconds(1)); // time - 1
             dispatcher.Invoke(new Action(() =>
             {
-                if (onTimerElapsedExecute != null) onTimerElapsedExecute();
+                if (onTimerElapsedExecute != null) onTimerElapsedExecute(); // execute all methods on elapsed
                 if (Time <= TimeSpan.Zero)
                 {
                     StopTimer();
-                    if (onTimeOutExecute != null) onTimeOutExecute();
+                    if (onTimeOutExecute != null) onTimeOutExecute(); // execute all methods on time out
                     NulliftDelegates();
                     return;
                 }

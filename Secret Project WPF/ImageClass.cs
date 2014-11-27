@@ -31,10 +31,12 @@ namespace Secret_Project_WPF
         /// </summary>
         public ImageClass()
         {
+            // Init the control
             wfh = new WindowsFormsHost();
             wfh.HorizontalAlignment = HorizontalAlignment.Left;
             wfh.VerticalAlignment = VerticalAlignment.Top;
 
+            // Init the pictureBox and set it as a child to the control
             picBox = new System.Windows.Forms.PictureBox();
             wfh.Child = picBox;
 
@@ -43,6 +45,9 @@ namespace Secret_Project_WPF
             picBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
         }
 
+        /// <summary>
+        /// Initializes the image window
+        /// </summary>
         public static void InitImageWindow()
         {
             imageWindow = new Window();
@@ -79,9 +84,11 @@ namespace Secret_Project_WPF
             wfh.Visibility = Visibility.Hidden;
         }
 
-        public delegate void MethodsToExecute();
-        public static MethodsToExecute pictureOpenMethods = null;
-        public static MethodsToExecute pictureCloseMethods = null;
+        //Methods to execute on opening a picture
+        public static Action pictureOpenMethods = null;
+
+        //Methods to execute on closing the picture
+        public static Action pictureCloseMethods = null;
 
         /// <summary>
         /// The window that opens when you click on an image
@@ -108,7 +115,10 @@ namespace Secret_Project_WPF
         /// <param name="handle"></param>
         public static void CloseWindow()
         {
-            if(imageWindow != null) imageWindow.Close();
+            if (imageWindow != null)
+            {
+                imageWindow.Close();
+            }
         }
 
         /// <summary>
@@ -118,8 +128,8 @@ namespace Secret_Project_WPF
         /// <param name="e"></param>
         public static void picBox_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            if (e.Button == System.Windows.Forms.MouseButtons.Left)
-                downTime = DateTime.Now;
+            if (e.Button == System.Windows.Forms.MouseButtons.Left) // If the press is with the left mouse button
+                downTime = DateTime.Now; // Save the current time
         }
 
         /// <summary>
@@ -130,22 +140,24 @@ namespace Secret_Project_WPF
         public void picBox_MouseUp(object sender,
                                    System.Windows.Forms.MouseEventArgs e)
         {
-            TimeSpan timeSinceDown = DateTime.Now - downTime;
+            TimeSpan timeSinceDown = DateTime.Now - downTime; // Calculate time passed since pressed button
             if (timeSinceDown.TotalMilliseconds >= 500 ||
                 e.Button != System.Windows.Forms.MouseButtons.Left ||
                 this.picBox.Image == null)
             {
                 return;
             }
-            this.Hide();
+            this.Hide(); // Hide the control
 
-            System.Drawing.Image img = this.picBox.Image;
-            this.picBox.Image = null;
+            System.Drawing.Image img = this.picBox.Image; // Get a reference to the image
+            this.picBox.Image = null; // Release the image from the picture box
 
+            // Set the image a child to a new picture box
             System.Windows.Forms.PictureBox l_picBox = new System.Windows.Forms.PictureBox();
             l_picBox.Image = img;
             l_picBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 
+            // Calculate and set the image window's sizes
             imageWindow.Height = 500D;
             double imageRatio = (double)(img.Width) / img.Height;
             l_picBox.Height = (int)imageWindow.Height;
@@ -155,7 +167,6 @@ namespace Secret_Project_WPF
             WindowsFormsHost wfh = new WindowsFormsHost();
             wfh.Child = l_picBox;
             imageWindow.Content = wfh;
-
 
             //Set the image window's icon
             System.Drawing.Icon iconHandle = Properties.Resources.icon;
@@ -168,27 +179,34 @@ namespace Secret_Project_WPF
                       BitmapSizeOptions.FromEmptyOptions());
             imageWindow.Icon = wpfBitmap;
 
-            imageWindow.Closing += imageWindow_Closing;
-            //Show the image window
-            imageWindow.Show();
-            if(pictureOpenMethods != null) pictureOpenMethods();
-            pictureOpenMethods = null;
+            imageWindow.Closing += imageWindow_Closing; // Set the closing handle for the image window
+
+            imageWindow.Show(); //Show the image window
+            if(pictureOpenMethods != null) pictureOpenMethods(); // Run the picture open methods
+            pictureOpenMethods = null; // Nullify delegate
         }
 
+        /// <summary>
+        /// Event handler for when the image window is closing
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void imageWindow_Closing(object sender,
                                         System.ComponentModel.CancelEventArgs e)
         {
-            e.Cancel = true;
-            (sender as Window).Closing -= imageWindow_Closing;
-            (sender as Window).Hide();
+            e.Cancel = true; // Cancle the closing of the image
+            (sender as Window).Closing -= imageWindow_Closing; // Get rid of the closing event handler
+            (sender as Window).Hide(); // Hide the image window
 
+            //Create a picture box and add it to the control
             System.Windows.Forms.PictureBox picBox = (((sender as Window).Content as WindowsFormsHost).Child as System.Windows.Forms.PictureBox);
             System.Drawing.Image img = picBox.Image;
             picBox.Image = null;
             this.picBox.Image = img;
-            this.Show();
-            if (pictureCloseMethods != null) pictureCloseMethods();
-            pictureCloseMethods = null;
+
+            this.Show(); // show the control
+            if (pictureCloseMethods != null) pictureCloseMethods(); // Run the picture close methods
+            pictureCloseMethods = null; // Nullify delegate
         }
     }
 }
